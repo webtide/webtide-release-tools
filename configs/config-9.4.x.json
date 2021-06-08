@@ -1,0 +1,25 @@
+{
+  "github_repo_owner": "eclipse",
+  "github_repo_name": "jetty.project",
+  "branch": "jetty-9.4.x",
+  "label_exclusions": [
+    "test",
+    "build",
+    "duplicate"
+  ],
+  "commit_path_regex_exclusions": [
+    ".*/src/test/.*",
+    ".*/src/main/webapp/.*",
+    "^\\.git.*",
+    "^/dev/.*",
+    "^Jenkins.*",
+    ".*\\.md$",
+    ".*\\.txt$",
+    ".*\\.properties$",
+    ".*\\.jpg$",
+    ".*\\.png$"
+  ],
+  "branch_regex_exclusions": [
+    ".*/jetty-9\\.3\\.x$"
+  ]
+}
