@@ -21,7 +21,6 @@
   ],
   "branch_regex_exclusions": [
     ".*/jetty-9\\.3\\.x$",
-    ".*/jetty-9\\.4\\.x$",
-    ".*/jetty-9910\\.0\\.x$"
+    ".*/jetty-9\\.4\\.x$"
   ]
 }

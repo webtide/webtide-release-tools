@@ -2,23 +2,23 @@
 java -jar target/webtide-release-tools-1.0-SNAPSHOT-hybrid.jar \
    --config_file=configs/config-9.4.x.json \
    --repo_path=/home/joakim/code/jetty/jetty.project-alt/ \
-   --tag_version_prior=jetty-9.4.41.v20210516 \
-   --tag_version_current=jetty-9.4.42.v20210604 \
-   --output_path=target/9.4.42
+   --tag_version_prior=jetty-9.4.43.v20210629 \
+   --tag_version_current=jetty-9.4.44.v20210924 \
+   --output_path=logs/9.4.44
 
 
 
 java -jar target/webtide-release-tools-1.0-SNAPSHOT-hybrid.jar \
    --config_file=configs/config-10.0.x.json \
    --repo_path=/home/joakim/code/jetty/jetty.project-alt/ \
-   --tag_version_prior=jetty-10.0.3 \
-   --tag_version_current=jetty-10.0.4 \
-   --output_path=target/10.0.4
+   --tag_version_prior=jetty-10.0.7 \
+   --tag_version_current=jetty-10.0.8 \
+   --output_path=logs/10.0.8
 
 
 java -jar target/webtide-release-tools-1.0-SNAPSHOT-hybrid.jar \
    --config_file=configs/config-11.0.x.json \
    --repo_path=/home/joakim/code/jetty/jetty.project-alt/ \
-   --tag_version_prior=jetty-11.0.3 \
-   --tag_version_current=jetty-11.0.4 \
-   --output_path=target/11.0.4
+   --tag_version_prior=jetty-11.0.6 \
+   --tag_version_current=jetty-11.0.7 \
+   --output_path=logs/11.0.7

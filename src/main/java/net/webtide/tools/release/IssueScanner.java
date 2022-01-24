@@ -43,7 +43,7 @@ public class IssueScanner
     public static Set<Integer> scanResolutions(String message)
     {
         // skip dependabot bodies
-        if (message.contains("@dependabot"))
+        if (message == null || message.contains("@dependabot"))
         {
             return Collections.emptySet();
         }
