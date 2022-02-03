@@ -51,7 +51,7 @@
     </dependency>
     <dependency>
       <groupId>net.webtide.tools</groupId>
-      <artifactId>github-api</artifactId>
+      <artifactId>webtide-github-api</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
