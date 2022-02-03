@@ -193,7 +193,7 @@
               <shadedClassifierName>hybrid</shadedClassifierName>
               <artifactSet>
                 <includes>
-                  <include>net.webtide.tools:github-api</include>
+                  <include>net.webtide.tools:webtide-github-api</include>
                   <include>com.google.*:*</include>
                   <include>com.jcraft:*</include>
                   <include>org.eclipse.jgit:*</include>

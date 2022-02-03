@@ -2,8 +2,8 @@
 java -jar target/webtide-release-tools-1.0-SNAPSHOT-hybrid.jar \
    --config_file=configs/config-9.4.x.json \
    --repo_path=/home/joakim/code/jetty/jetty.project-alt/ \
-   --tag_version_prior=jetty-9.4.44.v20210924 \
-   --tag_version_current=jetty-9.4.45.v20220125 \
+   --tag_version_prior=jetty-9.4.44.v20210927 \
+   --tag_version_current=jetty-9.4.45.v20220203 \
    --output_path=logs/9.4.45
 
 

@@ -34,6 +34,7 @@ public class Change
     private IssueType refType = IssueType.UNKNOWN;
     private Set<Integer> refsAssociated;
     private String refTitle;
+    private Set<String> labels = new HashSet<>();
 
     public Change(int number)
     {
@@ -76,6 +77,7 @@ public class Change
             this.issues = new HashSet<>();
 
         this.issues.add(new NumTitle(issue.getNum(), issue.getTitle(), issue.getSkipSet()));
+        this.labels.addAll(issue.getLabels());
     }
 
     public void addPullRequest(ChangeIssue pr)
@@ -83,6 +85,7 @@ public class Change
         if (this.pullRequests == null)
             this.pullRequests = new HashSet<>();
         this.pullRequests.add(new NumTitle(pr.getNum(), pr.getTitle(), pr.getSkipSet()));
+        this.labels.addAll(pr.getLabels());
     }
 
     public Set<Author> getAuthors()
@@ -248,6 +251,10 @@ public class Change
             // Didn't find a relevant PR
             return false;
         }
+    }
+
+    public boolean hasLabel(String labelName) {
+        return labels.contains(labelName);
     }
 
     public static class RefTitle
