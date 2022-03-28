@@ -32,6 +32,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.common.base.Strings;
 import com.google.gson.FieldNamingPolicy;
@@ -652,11 +653,24 @@ public class ChangelogTool implements AutoCloseable
                 out.println();
             }
 
-            out.println("# Changelog");
+            // resolve titles, ids, etc ....
+            writeSection(out,"# Changelog", relevantChanges.stream().filter((c)->
+                    !c.hasLabel("dependencies")));
+            writeSection(out,"# Dependencies", relevantChanges.stream().filter((c)->
+                c.hasLabel("dependencies")));
+        }
+    }
+
+    private void writeSection(PrintWriter out, String sectionName, Stream<Change> changesStream)
+    {
+        List<Change> changes = changesStream.collect(Collectors.toList());
+        if (changes.size() > 0)
+        {
+            out.println();
+            out.println(sectionName);
             out.println();
 
-            // resolve titles, ids, etc ....
-            for (Change change : relevantChanges)
+            for (Change change : changes)
             {
                 out.printf("* #%d - ", change.getRefNumber());
                 out.print(change.getRefTitle());

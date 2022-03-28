@@ -51,7 +51,7 @@
     </dependency>
     <dependency>
       <groupId>net.webtide.tools</groupId>
-      <artifactId>github-api</artifactId>
+      <artifactId>webtide-github-api</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -193,7 +193,7 @@
               <shadedClassifierName>hybrid</shadedClassifierName>
               <artifactSet>
                 <includes>
-                  <include>net.webtide.tools:github-api</include>
+                  <include>net.webtide.tools:webtide-github-api</include>
                   <include>com.google.*:*</include>
                   <include>com.jcraft:*</include>
                   <include>org.eclipse.jgit:*</include>
