@@ -30,7 +30,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -96,6 +100,84 @@ public class ChangelogTool implements AutoCloseable
         config.getLabelExclusions().forEach(this::addLabelExclusion);
         config.getCommitPathRegexExclusions().forEach(this::addCommitPathRegexExclusion);
         config.getBranchRegexExclusions().forEach(this::addBranchRegexExclusion);
+    }
+
+    public static class DistinctRefTitle implements Predicate<Change>
+    {
+        private Map<String, Boolean> seen = new ConcurrentHashMap<>();
+
+        @Override
+        public boolean test(Change change)
+        {
+            String title = change.getRefTitle();
+            return seen.putIfAbsent(title, Boolean.TRUE) == null;
+        }
+    }
+
+    public static class DistinctDependencyBumpRef implements Predicate<Change>
+    {
+        private Map<String, Boolean> bumps = new ConcurrentHashMap<>();
+        private Pattern patternBump = Pattern.compile("^Bump (.*) to (.*)$");
+
+        @Override
+        public boolean test(Change change)
+        {
+            String title = change.getRefTitle();
+            Matcher matcher = patternBump.matcher(title);
+            if (matcher.find())
+            {
+                String depName = matcher.group(1);
+                return bumps.putIfAbsent(depName, Boolean.TRUE) == null;
+            }
+
+            // allow non-matching through.
+            return true;
+        }
+    }
+
+    public static class DependencyBumpComparator implements Comparator<Change>
+    {
+        private Pattern patternBump = Pattern.compile("^Bump (.*) to (.*)$");
+
+        @Override
+        public int compare(Change c1, Change c2)
+        {
+            Matcher matcher1 = patternBump.matcher(c1.getRefTitle());
+            Matcher matcher2 = patternBump.matcher(c2.getRefTitle());
+
+            if (matcher1.find())
+            {
+                if (matcher2.find())
+                {
+                    int diff = matcher1.group(1).compareTo(matcher2.group(1));
+                    if (diff != 0)
+                        return diff;
+                    return matcher2.group(2).compareTo(matcher1.group(2));
+                }
+            }
+
+            return c1.getRefTitle().compareTo(c2.getRefTitle());
+        }
+    }
+
+    public static class DependencyBumpSimplifier implements Function<Change, Change>
+    {
+        private Pattern patternBump = Pattern.compile("^Bump (.*) from (.*) to (.*)$");
+
+        @Override
+        public Change apply(Change change)
+        {
+            Matcher matcher = patternBump.matcher(change.getRefTitle());
+            if (matcher.find())
+            {
+                String depName = matcher.group(1);
+                String latestVersion = matcher.group(3);
+                String replacementTitle = String.format("Bump %s to %s", depName, latestVersion);
+                change.setRefTitle(replacementTitle);
+            }
+            // return same change.
+            return change;
+        }
     }
 
     @Override
@@ -654,10 +736,14 @@ public class ChangelogTool implements AutoCloseable
             }
 
             // resolve titles, ids, etc ....
-            writeSection(out,"# Changelog", relevantChanges.stream().filter((c)->
-                    !c.hasLabel("dependencies")));
-            writeSection(out,"# Dependencies", relevantChanges.stream().filter((c)->
-                c.hasLabel("dependencies")));
+            writeSection(out, "# Changelog", relevantChanges.stream().filter((c) ->
+                !c.hasLabel("dependencies")));
+            writeSection(out, "# Dependencies", relevantChanges.stream()
+                .filter((c) -> c.hasLabel("dependencies"))
+                .map(new ChangelogTool.DependencyBumpSimplifier())
+                .sorted(new ChangelogTool.DependencyBumpComparator())
+                .filter(new ChangelogTool.DistinctDependencyBumpRef())
+            );
         }
     }
 

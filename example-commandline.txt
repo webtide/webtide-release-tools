@@ -11,14 +11,14 @@ java -jar target/webtide-release-tools-1.0-SNAPSHOT-hybrid.jar \
 java -jar target/webtide-release-tools-1.0-SNAPSHOT-hybrid.jar \
    --config_file=configs/config-10.0.x.json \
    --repo_path=/home/joakim/code/jetty/jetty.project-alt/ \
-   --tag_version_prior=jetty-10.0.7 \
-   --tag_version_current=jetty-10.0.8 \
-   --output_path=logs/10.0.8
+   --tag_version_prior=jetty-10.0.8 \
+   --tag_version_current=jetty-10.0.9 \
+   --output_path=logs/10.0.9
 
 
 java -jar target/webtide-release-tools-1.0-SNAPSHOT-hybrid.jar \
    --config_file=configs/config-11.0.x.json \
    --repo_path=/home/joakim/code/jetty/jetty.project-alt/ \
-   --tag_version_prior=jetty-11.0.7 \
-   --tag_version_current=jetty-11.0.8 \
-   --output_path=logs/11.0.8
+   --tag_version_prior=jetty-11.0.8 \
+   --tag_version_current=jetty-11.0.9 \
+   --output_path=logs/11.0.9

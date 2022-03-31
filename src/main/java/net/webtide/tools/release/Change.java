@@ -128,6 +128,11 @@ public class Change
         return refTitle;
     }
 
+    public void setRefTitle(String title)
+    {
+        this.refTitle = title;
+    }
+
     public Set<Integer> getRefsAssociated()
     {
         return refsAssociated;
