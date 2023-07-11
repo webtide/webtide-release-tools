@@ -22,3 +22,10 @@ java -jar target/webtide-release-tools-1.0-SNAPSHOT-hybrid.jar \
    --tag_version_prior=jetty-11.0.10 \
    --tag_version_current=jetty-11.0.11 \
    --output_path=logs/11.0.11
+
+java -jar target/webtide-release-tools-1.0-SNAPSHOT-hybrid.jar \
+   --config_file=configs/config-12.0.x.json \
+   --repo_path=/home/olamy/dev/sources/jetty/jetty.project \
+   --tag_version_prior=jetty-12.0.0.beta1 \
+   --tag_version_current=jetty-12.0.0.beta2 \
+   --output_path=logs/12.0.0.beta2
