@@ -45,7 +45,7 @@ public class ConfigTest
         {
             Gson gson = new GsonBuilder()
                 .registerTypeAdapter(ZonedDateTime.class, new ISO8601TypeAdapter())
-                .registerTypeAdapter(Path.class, new PathTypeAdapter())
+                .registerTypeHierarchyAdapter(Path.class, new PathTypeAdapter())
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .create();
             JsonWriter jsonWriter = gson.newJsonWriter(writer);
