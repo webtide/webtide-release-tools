@@ -37,7 +37,7 @@
     <dependency>
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit</artifactId>
-      <version>6.3.0.202209071007-r</version>
+      <version>6.6.0.202305301015-r</version>
       <exclusions>
         <exclusion>
           <groupId>org.slf4j</groupId>
@@ -48,7 +48,7 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.4.4</version>
+      <version>1.4.8</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.gson</groupId>
@@ -63,7 +63,7 @@
     <dependency>
       <groupId>org.eclipse.jetty.toolchain</groupId>
       <artifactId>jetty-test-helper</artifactId>
-      <version>5.5</version>
+      <version>6.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
