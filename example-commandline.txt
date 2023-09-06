@@ -2,30 +2,30 @@
 java -jar target/webtide-release-tools-1.0-SNAPSHOT-hybrid.jar \
    --config_file=configs/config-9.4.x.json \
    --repo_path=/home/joakim/code/jetty/jetty.project-alt/ \
-   --tag_version_prior=jetty-9.4.50.v20221201 \
-   --tag_version_current=jetty-9.4.51.v20230217 \
-   --output_path=logs/9.4.51
+   --tag_version_prior=jetty-9.4.51.v20230217 \
+   --tag_version_current=jetty-9.4.52.v20230823 \
+   --output_path=logs/9.4.52
 
 
 
 java -jar target/webtide-release-tools-1.0-SNAPSHOT-hybrid.jar \
    --config_file=configs/config-10.0.x.json \
    --repo_path=/home/joakim/code/jetty/jetty.project-alt/ \
-   --tag_version_prior=jetty-10.0.14 \
-   --tag_version_current=jetty-10.0.15 \
-   --output_path=logs/10.0.15
+   --tag_version_prior=jetty-10.0.15 \
+   --tag_version_current=jetty-10.0.16 \
+   --output_path=logs/10.0.16
 
 
 java -jar target/webtide-release-tools-1.0-SNAPSHOT-hybrid.jar \
    --config_file=configs/config-11.0.x.json \
    --repo_path=/home/joakim/code/jetty/jetty.project-alt/ \
-   --tag_version_prior=jetty-11.0.14 \
-   --tag_version_current=jetty-11.0.15 \
-   --output_path=logs/11.0.15
+   --tag_version_prior=jetty-11.0.15 \
+   --tag_version_current=jetty-11.0.16 \
+   --output_path=logs/11.0.16
 
 java -jar target/webtide-release-tools-1.0-SNAPSHOT-hybrid.jar \
    --config_file=configs/config-12.0.x.json \
    --repo_path=/home/joakim/code/jetty/jetty.project-alt/ \
-   --tag_version_prior=jetty-12.0.0.alpha2 \
-   --tag_version_current=jetty-12.0.0.alpha3 \
-   --output_path=logs/12.0.0.alpha3
+   --tag_version_prior=jetty-12.0.0 \
+   --tag_version_current=jetty-12.0.1 \
+   --output_path=logs/12.0.1
