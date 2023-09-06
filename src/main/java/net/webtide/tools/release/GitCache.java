@@ -63,6 +63,11 @@ public class GitCache implements AutoCloseable
 
     public GitCache(Git git)
     {
+        this(git, resolveCacheFile(git.getRepository()));
+    }
+
+    public GitCache(Git git, Path cacheFile)
+    {
         this.git = git;
         this.repository = git.getRepository();
         this.revWalker = new RevWalk(this.repository);
@@ -71,27 +76,8 @@ public class GitCache implements AutoCloseable
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .create();
 
-        Path gitPath = repository.getDirectory().toPath();
-        if (gitPath.getFileName().toString().equals(".git"))
-        {
-            gitPath = gitPath.getParent();
-        }
-        Path configRoot = Paths.get(System.getProperty("user.home"), ".cache", "git-changelog", gitPath.getFileName().toString());
-        LOG.debug("Git Cache: {}", configRoot);
-
-        if (!Files.exists(configRoot))
-        {
-            try
-            {
-                Files.createDirectories(configRoot);
-            }
-            catch (IOException e)
-            {
-                LOG.warn("Unable to create config root directories: {}", configRoot, e);
-            }
-        }
-
-        this.commitsCache = configRoot.resolve("commits.json");
+        LOG.info("Git Cache: {}", cacheFile);
+        this.commitsCache = cacheFile;
         this.commits = loadCommitsCache();
     }
 
@@ -242,6 +228,31 @@ public class GitCache implements AutoCloseable
         {
             throw new ChangelogException("Unable to query git for branches containing: " + sha, e);
         }
+    }
+
+    private static Path resolveCacheFile(Repository repository)
+    {
+        Path gitPath = repository.getDirectory().toPath();
+        if (gitPath.getFileName().toString().equals(".git"))
+        {
+            gitPath = gitPath.getParent();
+        }
+        Path configRoot = Paths.get(System.getProperty("user.home"), ".cache", "git-changelog", gitPath.getFileName().toString());
+        LOG.debug("Git Cache: {}", configRoot);
+
+        if (!Files.exists(configRoot))
+        {
+            try
+            {
+                Files.createDirectories(configRoot);
+            }
+            catch (IOException e)
+            {
+                LOG.warn("Unable to create config root directories: {}", configRoot, e);
+            }
+        }
+
+        return configRoot.resolve("commits.json");
     }
 
     public static class Commits

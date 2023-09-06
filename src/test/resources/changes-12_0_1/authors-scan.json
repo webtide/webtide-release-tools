@@ -1,0 +1,119 @@
+[
+  {
+    "github": "joakime",
+    "name": "Joakim Erdfelt",
+    "emails": [
+      "joakim.erdfelt@gmail.com",
+      "joakim@erdfelt.com"
+    ],
+    "committer": true
+  },
+  {
+    "github": "gregw",
+    "name": "Greg Wilkins",
+    "emails": [
+      "gregw@webtide.com"
+    ],
+    "committer": true
+  },
+  {
+    "github": "janbartel",
+    "name": "Jan Bartel",
+    "emails": [
+      "janb@webtide.com"
+    ],
+    "committer": true
+  },
+  {
+    "github": "sbordet",
+    "name": "Simone Bordet",
+    "emails": [
+      "simone.bordet@gmail.com"
+    ],
+    "committer": true
+  },
+  {
+    "github": "jmcc0nn3ll",
+    "name": "Jesse McConnell",
+    "emails": [
+      "jesse.mcconnell@gmail.com"
+    ],
+    "committer": true
+  },
+  {
+    "github": "olamy",
+    "name": "Olivier Lamy",
+    "emails": [
+      "oliver.lamy@gmail.com",
+      "olamy@webtide.com",
+      "olamy@apache.org"
+    ],
+    "committer": true
+  },
+  {
+    "github": "WalkerWatch",
+    "name": "Chris Walker",
+    "emails": [
+      "ctwalker@gmail.com",
+      "chris@webtide.com",
+      "WalkerWatch@users.noreply.github.com"
+    ],
+    "committer": true
+  },
+  {
+    "github": "lachlan-roberts",
+    "name": "Lachlan Roberts",
+    "emails": [
+      "lachlan@webtide.com"
+    ],
+    "committer": true
+  },
+  {
+    "github": "lorban",
+    "name": "Ludovic Orban",
+    "emails": [
+      "lorban@bitronix.be"
+    ],
+    "committer": true
+  },
+  {
+    "github": "dependabot[bot]",
+    "name": "Dependabot",
+    "emails": [
+      "49699333+dependabot[bot]@users.noreply.github.com"
+    ],
+    "committer": true
+  },
+  {
+    "github": "GitHub",
+    "name": "GitHub",
+    "emails": [
+      "noreply@github.com"
+    ],
+    "committer": true
+  },
+  {
+    "github": "yokotaso",
+    "name": "yokotaso",
+    "emails": [
+      "yokotaso.t@gmail.com"
+    ],
+    "committer": false
+  },
+  {
+    "github": "zugazagoitia",
+    "name": "Alberto Zugazagoitia",
+    "emails": [
+      "alberto@zugazagoitia.com"
+    ],
+    "committer": false
+  },
+  {
+    "github": "gregpoulos",
+    "name": "Greg Poulos",
+    "emails": [
+      "gregpoulos@users.noreply.github.com"
+    ],
+    "committer": false
+  }
+]

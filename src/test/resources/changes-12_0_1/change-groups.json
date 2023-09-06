@@ -1,0 +1,1599 @@
+[
+  {
+    "number": 0,
+    "authors": [
+      {
+        "github": "lachlan-roberts",
+        "name": "Lachlan Roberts",
+        "emails": [
+          "lachlan@webtide.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "76cc130d1733cd13a0ea36c9a04b7a7d5ae10024",
+        "title": "Merge pull request #10420 from eclipse/jetty-12.0.x-10402-ServletChannelRecycle",
+        "skips": [
+          "IS_MERGE_COMMIT"
+        ]
+      },
+      {
+        "id": "0a2cfab4a845c7f04b2adf6746663052db601054",
+        "title": "Issue #10402 - rename ServletChannelState open() to openOutput()"
+      },
+      {
+        "id": "27d0c7a181a7bb334f7d8c048eda2f4d82484d5a",
+        "title": "Issue #10402 - do not recycle ServletChannel if aborted"
+      },
+      {
+        "id": "1c1cc0296b6b7c659dc158bbe368f37a1ba6e14d",
+        "title": "remove debugging printlns",
+        "skips": [
+          "NO_INTERESTING_PATHS_LEFT"
+        ]
+      }
+    ],
+    "issues": [
+      {
+        "number": 10402,
+        "title": "Investigate NPE from EE10 AsyncServletIOTest",
+        "skips": [
+          "EXCLUDED_LABEL"
+        ]
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10420,
+        "title": "Issue #10402 - do not recycle ServletChannel if aborted"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10420,
+    "ref_type": "PULL_REQUEST",
+    "refs_associated": [],
+    "ref_title": "do not recycle ServletChannel if aborted",
+    "labels": [
+      "Test"
+    ]
+  },
+  {
+    "number": 1,
+    "authors": [
+      {
+        "github": "gregw",
+        "name": "Greg Wilkins",
+        "emails": [
+          "gregw@webtide.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "d6a022686602bb9f06a1074b9bd879f89afbb325",
+        "title": "Fix #9169 refine idle timeout and failure (#10418)"
+      }
+    ],
+    "issues": [
+      {
+        "number": 9169,
+        "title": "Idle timeout is ignored if callback is not completed"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10418,
+        "title": "Fix #9169 refine idle timeout and failure"
+      }
+    ],
+    "skip": false,
+    "ref_number": 9169,
+    "ref_type": "ISSUE",
+    "ref_title": "Idle timeout is ignored if callback is not completed",
+    "labels": [
+      "Jetty 12",
+      "Enhancement",
+      "build-no-cache"
+    ]
+  },
+  {
+    "number": 2,
+    "authors": [
+      {
+        "github": "gregw",
+        "name": "Greg Wilkins",
+        "emails": [
+          "gregw@webtide.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "e3ee84a5adcb392c9d537d7f1896183ea31d3f1c",
+        "title": "Fix #10416  Do not copy ee9 response headers (#10417)"
+      }
+    ],
+    "issues": [
+      {
+        "number": 10416,
+        "title": "EE9 Copies HttpFields in response"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10417,
+        "title": "Fix #10416  Do not copy ee9 response headers"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10416,
+    "ref_type": "ISSUE",
+    "ref_title": "EE9 Copies HttpFields in response",
+    "labels": [
+      "Bug",
+      "build-no-cache"
+    ]
+  },
+  {
+    "number": 3,
+    "authors": [
+      {
+        "github": "janbartel",
+        "name": "Jan Bartel",
+        "emails": [
+          "janb@webtide.com"
+        ],
+        "committer": true
+      },
+      {
+        "github": "joakime",
+        "name": "Joakim Erdfelt",
+        "emails": [
+          "joakim.erdfelt@gmail.com",
+          "joakim@erdfelt.com"
+        ],
+        "committer": true
+      },
+      {
+        "github": "gregw",
+        "name": "Greg Wilkins",
+        "emails": [
+          "gregw@webtide.com"
+        ],
+        "committer": true
+      },
+      {
+        "github": "sbordet",
+        "name": "Simone Bordet",
+        "emails": [
+          "simone.bordet@gmail.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "d3cd69be6820142f56200ccf98573a1a86a01be2",
+        "title": "Fix #10411 default environment (#10415)"
+      },
+      {
+        "id": "86c245d069c42f4bccf217102182cf94d9b72f6e",
+        "title": "Fixes #10158 - Deploy Jetty context XML file needs environment"
+      },
+      {
+        "id": "7cd55498e2bf211ce97b22b569a1f008a51e39c7",
+        "title": "Issue #10158 - tests to prove out XML only based deployment technique (#10209)",
+        "skips": [
+          "NO_INTERESTING_PATHS_LEFT"
+        ]
+      },
+      {
+        "id": "33ef0b040a39d21657ad30d5b92b2aa0c847d7c2",
+        "title": "Issue #10158 Change ignored deployment message to WARN (#10321)"
+      }
+    ],
+    "issues": [
+      {
+        "number": 10411,
+        "title": "Review deployment of Jetty Context XML files"
+      },
+      {
+        "number": 10158,
+        "title": "Deploying on Jetty 12 using context XML files will only work when a .properties file with the EE details is also present"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10209,
+        "title": "Issue #10158 - tests to prove out XML only based deployment technique",
+        "skips": [
+          "EXCLUDED_LABEL",
+          "NO_RELEVANT_COMMITS"
+        ]
+      },
+      {
+        "number": 10321,
+        "title": "Issue #10158 Change ignored deployment message to WARN"
+      },
+      {
+        "number": 10415,
+        "title": "Fix #10411 default environment"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10411,
+    "ref_type": "ISSUE",
+    "ref_title": "Review deployment of Jetty Context XML files",
+    "labels": [
+      "Bug",
+      "Test",
+      "Jetty 12",
+      "build-no-cache"
+    ]
+  },
+  {
+    "number": 4,
+    "authors": [
+      {
+        "github": "joakime",
+        "name": "Joakim Erdfelt",
+        "emails": [
+          "joakim.erdfelt@gmail.com",
+          "joakim@erdfelt.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "6683cc3654526518a1d3d90f1c0620ad91b11515",
+        "title": "Provides transitive vulnerable dependency maven:xalan:xalan:2.7.2 CVE-2022-34169 7.5 INCORRECT CONVERSION BETWEEN NUMERIC TYPES IN XALAN:XALAN"
+      },
+      {
+        "id": "5946503ee0ea02574c94cd0a14f8b3702868a1d4",
+        "title": "Merge pull request #10407 from eclipse/fix/12.0.x/transitive-dep-warnings",
+        "skips": [
+          "IS_MERGE_COMMIT"
+        ]
+      },
+      {
+        "id": "ae71b40acf8dcbc7a1700da41130b043135ad11d",
+        "title": "Provides transitive vulnerable dependency maven:org.wildfly.security:wildfly-elytron-credential:1.12.1.Final CVE-2022-3143 7.4 Observable Discrepancy vulnerability pending CVSS allocation"
+      },
+      {
+        "id": "6e96f2c4d760ccc255cd2a37aad3e70aeb254f4d",
+        "title": "Provides transitive vulnerable dependency maven:org.apache.commons:commons-compress:1.4.1 CVE-2018-11771 5.5 Loop with Unreachable Exit Condition (\u0027Infinite Loop\u0027) vulnerability pending CVSS allocation CVE-2021-35515 7.5 Excessive Iteration vulnerability pending CVSS allocation CVE-2021-35516 7.5 Improper Handling of Length Parameter Inconsistency vulnerability pending CVSS allocation CVE-2021-35517 7.5 Improper Handling of Length Parameter Inconsistency vulnerability pending CVSS allocation CVE-2021-36090 7.5 Improper Handling of Length Parameter Inconsistency vulnerability pending CVSS allocation"
+      },
+      {
+        "id": "87839d33509f4fe4f3cdca1bb0db76f1448a31e7",
+        "title": "Bump transitive vulnerable dependency maven:com.google.protobuf:protobuf-java:3.21.6 CVE-2022-3171 7.5 Uncontrolled Resource Consumption vulnerability with medium severity found CVE-2022-3509 7.5 Uncontrolled Resource Consumption vulnerability pending CVSS allocation CVE-2022-3510 7.5 Uncontrolled Resource Consumption vulnerability pending CVSS allocation"
+      },
+      {
+        "id": "ca95d3f22273ae174557d59df4e730700848b6dc",
+        "title": "Provides transitive vulnerable dependency maven:io.netty:netty-codec:4.1.58.Final CVE-2021-37136 7.5 Uncontrolled Resource Consumption vulnerability pending CVSS allocation CVE-2021-37137 7.5 Uncontrolled Resource Consumption vulnerability pending CVSS allocation CVE-2022-41915 6.5 Improper Neutralization of CRLF Sequences in HTTP Headers (\u0027HTTP Response Splitting\u0027) vulnerability pending CVSS allocation"
+      },
+      {
+        "id": "b8ce9db72976f9d8d95f0c94cb840f8acb94b7fc",
+        "title": "Old version of apache-avro uses old jackson."
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10407,
+        "title": "Address transitive dependencies with open CVEs"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10407,
+    "ref_type": "PULL_REQUEST",
+    "ref_title": "Address transitive dependencies with open CVEs",
+    "labels": [
+      "Jetty 12",
+      "dependencies"
+    ]
+  },
+  {
+    "number": 5,
+    "authors": [
+      {
+        "github": "joakime",
+        "name": "Joakim Erdfelt",
+        "emails": [
+          "joakim.erdfelt@gmail.com",
+          "joakim@erdfelt.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "053d44e52cc2f14853b38a098d64bd71fe45fd43",
+        "title": "Bump jetty-setuid to 2.0.1 (#10406)"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10406,
+        "title": "Bump jetty-setuid to 2.0.1"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10406,
+    "ref_type": "PULL_REQUEST",
+    "ref_title": "Bump jetty-setuid to 2.0.1",
+    "labels": [
+      "Bug",
+      "Jetty 12"
+    ]
+  },
+  {
+    "number": 6,
+    "authors": [
+      {
+        "github": "lachlan-roberts",
+        "name": "Lachlan Roberts",
+        "emails": [
+          "lachlan@webtide.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "be11dfdbabd6a658c9ed978ad176fabc2131a783",
+        "title": "Merge PR #10400 to 12.0.x for InetAccessHandler (#10403)"
+      }
+    ],
+    "issues": [
+      {
+        "number": 10388,
+        "title": "Jetty10 inetaccess mod started error"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10403,
+        "title": "Merge PR #10400 to 12.0.x for InetAccessHandler"
+      },
+      {
+        "number": 10400,
+        "title": "Issue #10388 - fix InetAccessHandler module",
+        "skips": [
+          "NOT_CORRECT_BASE_REF"
+        ]
+      }
+    ],
+    "skip": false,
+    "ref_number": 10388,
+    "ref_type": "ISSUE",
+    "ref_title": "Jetty10 inetaccess mod started error",
+    "labels": [
+      "Bug"
+    ]
+  },
+  {
+    "number": 7,
+    "authors": [
+      {
+        "github": "lachlan-roberts",
+        "name": "Lachlan Roberts",
+        "emails": [
+          "lachlan@webtide.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "bb67a8aaeb901a9573b2d012bdc84677a1f0f004",
+        "title": "Issue #10383 - suppress stack traces from AsyncListenerTest",
+        "skips": [
+          "NO_INTERESTING_PATHS_LEFT"
+        ]
+      },
+      {
+        "id": "ff02d3b08656322ba7c1ba337fc856e4d22cd06e",
+        "title": "Merge pull request #10394 from eclipse/jetty-12.0.x-10383-AsyncListenerTest",
+        "skips": [
+          "IS_MERGE_COMMIT"
+        ]
+      },
+      {
+        "id": "a4055a21b05bf2eaabb9dff22c44af869238b57c",
+        "title": "revert change to stopTimeout in AsyncListenerTest",
+        "skips": [
+          "NO_INTERESTING_PATHS_LEFT"
+        ]
+      },
+      {
+        "id": "b9e915b70e0c2e7ec19a1fe92d85b4d588737579",
+        "title": "Issue #10383 - Modify ServletChannelState to not warn on QuietExceptions"
+      },
+      {
+        "id": "f00296ce0652d20f2677d0ba0485e2bc7330fa75",
+        "title": "Issue #10383 - suppress stack traces from AsyncListenerTest",
+        "skips": [
+          "NO_INTERESTING_PATHS_LEFT"
+        ]
+      }
+    ],
+    "issues": [
+      {
+        "number": 10383,
+        "title": "Unsuppressed exceptions from  EE10 ServletTest"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10394,
+        "title": "Issue #10383 - suppress stack traces from AsyncListenerTest"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10383,
+    "ref_type": "ISSUE",
+    "ref_title": "Unsuppressed exceptions from  EE10 ServletTest",
+    "labels": [
+      "Bug"
+    ]
+  },
+  {
+    "number": 8,
+    "authors": [
+      {
+        "github": "janbartel",
+        "name": "Jan Bartel",
+        "emails": [
+          "janb@webtide.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "5808a62660262e0f7b0dd78f4a1465f68541e581",
+        "title": "Issue #10356 Update Weld integration (#10359)"
+      }
+    ],
+    "issues": [
+      {
+        "number": 10356,
+        "title": "Deploying WAR with `ee10-cdi-spi` fails with Weld 5/CDI 4"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10359,
+        "title": "Issue #10356 Update Weld integration"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10356,
+    "ref_type": "ISSUE",
+    "ref_title": "Deploying WAR with `ee10-cdi-spi` fails with Weld 5/CDI 4",
+    "labels": [
+      "Bug"
+    ]
+  },
+  {
+    "number": 9,
+    "authors": [
+      {
+        "github": "gregw",
+        "name": "Greg Wilkins",
+        "emails": [
+          "gregw@webtide.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "8f5590c1d90ed9905f7ec739124f702243ac6d1a",
+        "title": "Fix #10349 ContentType set twice (#10358)"
+      }
+    ],
+    "issues": [
+      {
+        "number": 10349,
+        "title": "Character encoding is reset when setting Content-Type"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10358,
+        "title": "Fix #10349 ContentType set twice"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10349,
+    "ref_type": "ISSUE",
+    "ref_title": "Character encoding is reset when setting Content-Type",
+    "labels": [
+      "Bug"
+    ]
+  },
+  {
+    "number": 10,
+    "authors": [
+      {
+        "github": "sbordet",
+        "name": "Simone Bordet",
+        "emails": [
+          "simone.bordet@gmail.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "5a8c5bc8c76e511fd7dd907bedc1eccdb8060608",
+        "title": "Fixes #10353 - Questions about porting WebSocket APIs to jetty-core 12 (#10354)"
+      }
+    ],
+    "issues": [
+      {
+        "number": 10353,
+        "title": "Questions about porting WebSocket APIs to jetty-core 12"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10354,
+        "title": "Fixes #10353 - Questions about porting WebSocket APIs to jetty-core 12"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10353,
+    "ref_type": "ISSUE",
+    "ref_title": "Questions about porting WebSocket APIs to jetty-core 12",
+    "labels": [
+      "Question"
+    ]
+  },
+  {
+    "number": 11,
+    "authors": [
+      {
+        "github": "sbordet",
+        "name": "Simone Bordet",
+        "emails": [
+          "simone.bordet@gmail.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "7de4b6a0e9f5fabaab6b3ecf2505a67cdf29d1a5",
+        "title": "Fixes #10315 - ServletInputStream::isReady results in IllegalArgument… (#10343)"
+      }
+    ],
+    "issues": [
+      {
+        "number": 10315,
+        "title": "ServletInputStream::isReady results in IllegalArgumentException"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10343,
+        "title": "Fixes #10315 - ServletInputStream::isReady results in IllegalArgument…"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10315,
+    "ref_type": "ISSUE",
+    "ref_title": "ServletInputStream::isReady results in IllegalArgumentException",
+    "labels": [
+      "High Priority",
+      "Bug"
+    ]
+  },
+  {
+    "number": 12,
+    "authors": [
+      {
+        "github": "lachlan-roberts",
+        "name": "Lachlan Roberts",
+        "emails": [
+          "lachlan@webtide.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "2126ac262cbd4fcd92e32ea806e5383d1e8ea71f",
+        "title": "Issue #10337 - fixes for SizeLimitHandler"
+      },
+      {
+        "id": "be83eb94ad988c4a00e8179fbbd508d6ab640e59",
+        "title": "Merge remote-tracking branch \u0027origin/jetty-12.0.x\u0027 into jetty-12.0.x-FixSizeLimitHandler",
+        "skips": [
+          "IS_MERGE_COMMIT"
+        ]
+      },
+      {
+        "id": "e6942da18eec31d4818be07094cc75e3e8ff1e7a",
+        "title": "Issue #10337 - fixes for SizeLimitHandler"
+      },
+      {
+        "id": "67404f96ce1affa8692edfc9783a07246389f053",
+        "title": "use HttpStatus for 413 and 500 codes in SizeLimitHandler"
+      },
+      {
+        "id": "acb4ed71741485c2a01468567b663729f207208a",
+        "title": "Merge pull request #10342 from eclipse/jetty-12.0.x-FixSizeLimitHandler",
+        "skips": [
+          "IS_MERGE_COMMIT"
+        ]
+      },
+      {
+        "id": "4bd3a8e431a4ab239b50995df4ccf8460d5e88fe",
+        "title": "Revert \"Issue #10337 - fixes for SizeLimitHandler\""
+      }
+    ],
+    "issues": [
+      {
+        "number": 10337,
+        "title": "SizeLimitHandler does not enforce 0 responseLimit"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10342,
+        "title": "Issue #10337 - fixes for SizeLimitHandler"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10337,
+    "ref_type": "ISSUE",
+    "ref_title": "SizeLimitHandler does not enforce 0 responseLimit",
+    "labels": [
+      "Bug",
+      "Sponsored"
+    ]
+  },
+  {
+    "number": 13,
+    "authors": [
+      {
+        "github": "gregw",
+        "name": "Greg Wilkins",
+        "emails": [
+          "gregw@webtide.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "8ed56b3466fa09babdbd3fec926a3c6a9b187ded",
+        "title": "Implement containsLast in HttpFields (#10340)"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10340,
+        "title": "Implement containsLast in HttpFields"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10340,
+    "ref_type": "PULL_REQUEST",
+    "ref_title": "Implement containsLast in HttpFields",
+    "labels": []
+  },
+  {
+    "number": 14,
+    "authors": [
+      {
+        "github": "gregw",
+        "name": "Greg Wilkins",
+        "emails": [
+          "gregw@webtide.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "4086c7ee47e3e073c9edb0bc594395abf5762fb6",
+        "title": "Persistent HttpFields (#10339)"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10339,
+        "title": "Freeze HttpFields"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10339,
+    "ref_type": "PULL_REQUEST",
+    "ref_title": "Freeze HttpFields",
+    "labels": []
+  },
+  {
+    "number": 15,
+    "authors": [
+      {
+        "github": "janbartel",
+        "name": "Jan Bartel",
+        "emails": [
+          "janb@webtide.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "fe1831008a8c1a1a5af6d876c0380e1b126476e1",
+        "title": "Issue #10323 Fix ee10 Request.isRequestedSessionIdValid (#10331)"
+      }
+    ],
+    "issues": [
+      {
+        "number": 10323,
+        "title": "Jetty 12.0.0 return wrong value for HttpServletRequest.isRequestedSessionIdValid"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10331,
+        "title": "Issue #10323 Fix ee10 Request.isRequestedSessionIdValid"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10323,
+    "ref_type": "ISSUE",
+    "ref_title": "Jetty 12.0.0 return wrong value for HttpServletRequest.isRequestedSessionIdValid",
+    "labels": [
+      "Bug"
+    ]
+  },
+  {
+    "number": 16,
+    "authors": [
+      {
+        "github": "lorban",
+        "name": "Ludovic Orban",
+        "emails": [
+          "lorban@bitronix.be"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "5b934353581f598bd91d80a9bfb3dd188fd0a2c3",
+        "title": "#10330 - handle review comments"
+      },
+      {
+        "id": "7f0a3565859d17f64d330bb11df22b0b908cebb0",
+        "title": "#10330 - Fix broken EE9 DefaultServlet range requests"
+      },
+      {
+        "id": "dd6a971f27247228171015b6897093360edccb50",
+        "title": "#10330 - Fix broken EE10 DefaultServlet range requests"
+      },
+      {
+        "id": "ded90926f6fe989b6b9180c37fcdfb1a6dfdded2",
+        "title": "#10330 - fix tests after merge",
+        "skips": [
+          "NO_INTERESTING_PATHS_LEFT"
+        ]
+      },
+      {
+        "id": "57823bef6eaf96f9f2638e36715b3e9e945e6d36",
+        "title": "#10330 - add extra ResourceHandler range tests",
+        "skips": [
+          "NO_INTERESTING_PATHS_LEFT"
+        ]
+      },
+      {
+        "id": "6b1c490dbc287fc9484c6fbcedd0e5a92a6e375f",
+        "title": "#10330 - simplify acceptRanges setting\u0027s handling logic"
+      }
+    ],
+    "issues": [
+      {
+        "number": 10330,
+        "title": "Jetty 12: ResourceService throws NPE when resource has no filesystem path"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10330,
+    "ref_type": "ISSUE",
+    "ref_title": "Jetty 12: ResourceService throws NPE when resource has no filesystem path",
+    "labels": [
+      "Bug"
+    ]
+  },
+  {
+    "number": 17,
+    "authors": [
+      {
+        "github": "janbartel",
+        "name": "Jan Bartel",
+        "emails": [
+          "janb@webtide.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "5160ad29ef69f1302abb536067e2f4575bba01e5",
+        "title": "Issue #10207 Update missing JSP message. (#10320)"
+      }
+    ],
+    "issues": [
+      {
+        "number": 10207,
+        "title": "Update failed JSP deployment message"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10320,
+        "title": "Issue #10207 Update missing JSP message."
+      }
+    ],
+    "skip": false,
+    "ref_number": 10207,
+    "ref_type": "ISSUE",
+    "ref_title": "Update failed JSP deployment message",
+    "labels": [
+      "Enhancement"
+    ]
+  },
+  {
+    "number": 18,
+    "authors": [
+      {
+        "github": "lachlan-roberts",
+        "name": "Lachlan Roberts",
+        "emails": [
+          "lachlan@webtide.com"
+        ],
+        "committer": true
+      },
+      {
+        "github": "gregw",
+        "name": "Greg Wilkins",
+        "emails": [
+          "gregw@webtide.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "87396105fbb8ddb16c2fabfd13b140f7de985d35",
+        "title": "Issue #10295 - use ServletChannel states for the security handler dispatch"
+      },
+      {
+        "id": "5c7a222697675fdb7425ef8416e1b2b089f8f691",
+        "title": "Merge pull request #10313 from eclipse/jetty-12.0.x-10295-formAuthDispatch",
+        "skips": [
+          "IS_MERGE_COMMIT"
+        ]
+      },
+      {
+        "id": "f9f42d53038b7cf4058bc0529f6598ffb3a5ad49",
+        "title": "add testing for core FormAuthenticator dispatch"
+      },
+      {
+        "id": "7b95ec4f7b6dbda9bb1e690698ea86d5b302366f",
+        "title": "Merge remote-tracking branch \u0027origin/jetty-12.0.x\u0027 into jetty-12.0.x-10295-formAuthDispatch",
+        "skips": [
+          "IS_MERGE_COMMIT"
+        ]
+      },
+      {
+        "id": "d31943128141df8427817c049cda09c26c407f47",
+        "title": "rename to TestUserIdentity",
+        "skips": [
+          "NO_INTERESTING_PATHS_LEFT"
+        ]
+      },
+      {
+        "id": "715e1fe3335a8981e89121cf1963c0ece571117e",
+        "title": "call listeners when doing an initial forward dispatch"
+      },
+      {
+        "id": "a8832c4fa9d270630dbf4932e2efacdd47d0f8ca",
+        "title": "fixes for BasicAuthenticatorTest",
+        "skips": [
+          "NO_INTERESTING_PATHS_LEFT"
+        ]
+      },
+      {
+        "id": "9208629e95d9f34db0d9423e21b96faf18bd881b",
+        "title": "make the dispatch feature work for core securityHandler"
+      },
+      {
+        "id": "a418e0db71a7506796b34721f9a7f2ef44665087",
+        "title": "Merge remote-tracking branch \u0027origin/jetty-12.0.x\u0027 into jetty-12.0.x-10295-formAuthDispatch",
+        "skips": [
+          "IS_MERGE_COMMIT"
+        ]
+      },
+      {
+        "id": "8c645abf7fc9aceb12ace3082a572840906844a5",
+        "title": "make some protected methods private in FormAuthenticator"
+      },
+      {
+        "id": "f0953e4d29a25d5fa78cacfcfa764f4beb0b7338",
+        "title": "add javadoc and rename AuthenticationState.ServeAs.PathWrapper"
+      },
+      {
+        "id": "5a28d48b9399995edad45b2499cfd706f3e09de8",
+        "title": "Move ServeAs code to Request, so it can be used elsewhere"
+      },
+      {
+        "id": "7e875d141184e3ae71a70e8797c7c4633cc937f3",
+        "title": "make the ServeAs.PathWrapper take HttpURI instead of String"
+      },
+      {
+        "id": "798f455e6f16c984ce6660cfd1c6a9df37ce3444",
+        "title": "fix checkstyle error",
+        "skips": [
+          "NO_INTERESTING_PATHS_LEFT"
+        ]
+      },
+      {
+        "id": "6e5ea8196f792f5ffc1334c8fab31c17755d0771",
+        "title": "cleanups and changes from review"
+      },
+      {
+        "id": "db5209e97abeb23eca98faa3164a79a6b1b7b806",
+        "title": "Implement ServeAs in core SecurityHandler"
+      },
+      {
+        "id": "3b1e07ef9908ce5aa146b8d3b375ad98a3da6223",
+        "title": "make AuthenticationState.ServeAs as class instead of interface"
+      },
+      {
+        "id": "dadd5b0c0413cbefc67430094e46e5d98041dfe9",
+        "title": "fix bug in ServletContextRequest.wrap"
+      },
+      {
+        "id": "9f6da9a11e6fa194f3ab22df2343a0e744bdf3f2",
+        "title": "add some javadoc and cleanup to Request.get"
+      },
+      {
+        "id": "e9ab7498a9ff385a53d80b134e6ca5f25e9e0ed1",
+        "title": "Issue #10295 - create an EE10 FormAuthenticator"
+      },
+      {
+        "id": "1b6b8331facf7ad0bfd06ef857604e56ed9fa8b0",
+        "title": "fix bug in SecurityHandler and remove EE10 FormAuthenticator"
+      }
+    ],
+    "issues": [
+      {
+        "number": 10295,
+        "title": "FormAuthenticator does not dispatch to an error page but redirect"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10313,
+        "title": "Issue #10295 - implement EE10 FormAuthenticator with dispatch option"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10295,
+    "ref_type": "ISSUE",
+    "ref_title": "FormAuthenticator does not dispatch to an error page but redirect",
+    "labels": [
+      "Bug",
+      "Low Priority"
+    ]
+  },
+  {
+    "number": 19,
+    "authors": [
+      {
+        "github": "gregw",
+        "name": "Greg Wilkins",
+        "emails": [
+          "gregw@webtide.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "042841a7c6bd1ee847ee5cdbab8c49d5f27973aa",
+        "title": "Fix #10306 getServerHost (#10311)"
+      }
+    ],
+    "issues": [
+      {
+        "number": 10306,
+        "title": "Jetty 12 generates wrong Host header"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10311,
+        "title": "Fix #10306 getServerHost"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10306,
+    "ref_type": "ISSUE",
+    "ref_title": "Jetty 12 generates wrong Host header",
+    "labels": [
+      "Bug"
+    ]
+  },
+  {
+    "number": 20,
+    "authors": [
+      {
+        "github": "joakime",
+        "name": "Joakim Erdfelt",
+        "emails": [
+          "joakim.erdfelt@gmail.com",
+          "joakim@erdfelt.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "2178dc291312a4d38ea689553279d5a379862044",
+        "title": "Issue #10309 - Duplicate `X-Powered-By` headers (#10310)"
+      }
+    ],
+    "issues": [
+      {
+        "number": 10309,
+        "title": "Jetty 12: X-Powered-By header is added 2 times (if enabled)"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10310,
+        "title": "Issue #10309 - Duplicate `X-Powered-By` headers"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10309,
+    "ref_type": "ISSUE",
+    "ref_title": "Jetty 12: X-Powered-By header is added 2 times (if enabled)",
+    "labels": [
+      "Bug",
+      "Jetty 12"
+    ]
+  },
+  {
+    "number": 21,
+    "authors": [
+      {
+        "github": "sbordet",
+        "name": "Simone Bordet",
+        "emails": [
+          "simone.bordet@gmail.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "660ba4bbe5d627554c9ce75803acd994538e1a80",
+        "title": "Fixes #10284 - Document all HttpFields methods (#10308)"
+      }
+    ],
+    "issues": [
+      {
+        "number": 10284,
+        "title": "Document all HttpFields methods"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10308,
+        "title": "Fixes #10284 - Document all HttpFields methods"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10284,
+    "ref_type": "ISSUE",
+    "ref_title": "Document all HttpFields methods",
+    "labels": [
+      "Documentation",
+      "Jetty 12",
+      "Enhancement"
+    ]
+  },
+  {
+    "number": 22,
+    "authors": [
+      {
+        "github": "gregw",
+        "name": "Greg Wilkins",
+        "emails": [
+          "gregw@webtide.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "c74437f9a8001bf259e4ed5a1d250da768fa7dfc",
+        "title": "Improve contextpath javadoc (#10297)"
+      }
+    ],
+    "issues": [
+      {
+        "number": 10294,
+        "title": "Request.getContext().getContextPath()"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10297,
+        "title": "Improve contextpath javadoc"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10294,
+    "ref_type": "ISSUE",
+    "ref_title": "Request.getContext().getContextPath()",
+    "labels": [
+      "Bug"
+    ]
+  },
+  {
+    "number": 23,
+    "authors": [
+      {
+        "github": "sbordet",
+        "name": "Simone Bordet",
+        "emails": [
+          "simone.bordet@gmail.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "c638753b8d821c9af26ddd78ced74e3136e2cb4c",
+        "title": "Fixes #10293 - Improve documentation on how to write a response body in Jetty 12."
+      }
+    ],
+    "issues": [
+      {
+        "number": 10293,
+        "title": "Improve documentation on how to write a response body in Jetty 12"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10293,
+    "ref_type": "ISSUE",
+    "ref_title": "Improve documentation on how to write a response body in Jetty 12",
+    "labels": [
+      "Documentation",
+      "Question"
+    ]
+  },
+  {
+    "number": 24,
+    "authors": [
+      {
+        "github": "joakime",
+        "name": "Joakim Erdfelt",
+        "emails": [
+          "joakim.erdfelt@gmail.com",
+          "joakim@erdfelt.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "fd1413db58dd392ae11507da6c83fd097fdb146a",
+        "title": "Issue #10274 - Improve javadoc + move internal methods (#10276)"
+      }
+    ],
+    "issues": [
+      {
+        "number": 10274,
+        "title": "java.nio.file.FileSystemNotFoundException when creating a resource from a JAR URL"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10276,
+        "title": "Issue #10274 - Improve javadoc + move internal methods"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10274,
+    "ref_type": "ISSUE",
+    "ref_title": "java.nio.file.FileSystemNotFoundException when creating a resource from a JAR URL",
+    "labels": [
+      "Bug",
+      "Documentation",
+      "Enhancement"
+    ]
+  },
+  {
+    "number": 25,
+    "authors": [
+      {
+        "github": "zugazagoitia",
+        "name": "Alberto Zugazagoitia",
+        "emails": [
+          "alberto@zugazagoitia.com"
+        ],
+        "committer": false
+      },
+      {
+        "github": "joakime",
+        "name": "Joakim Erdfelt",
+        "emails": [
+          "joakim.erdfelt@gmail.com",
+          "joakim@erdfelt.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "1a9f428b3d3aa908c1402e5bb4392edf422396b5",
+        "title": "Merge pull request #10275 from zugazagoitia/zugazagoitia-patch-1",
+        "skips": [
+          "IS_MERGE_COMMIT"
+        ]
+      },
+      {
+        "id": "ed59dff373aa8b4b9f9d58f7c0b7190b81e3a1dd",
+        "title": "Update server-websocket-jetty.adoc"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10275,
+        "title": "Fix wrong websocket artifact Jetty 12.x docs"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10275,
+    "ref_type": "PULL_REQUEST",
+    "ref_title": "Fix wrong websocket artifact Jetty 12.x docs",
+    "labels": []
+  },
+  {
+    "number": 26,
+    "authors": [
+      {
+        "github": "lorban",
+        "name": "Ludovic Orban",
+        "emails": [
+          "lorban@bitronix.be"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "8ae62e3a953dc782882b6231e4004a097abea2c2",
+        "title": "#10226 disable client leak tracking for all transports",
+        "skips": [
+          "NO_INTERESTING_PATHS_LEFT"
+        ]
+      },
+      {
+        "id": "bbb994f96d4c85d7fe6b930724d9aee133d89e59",
+        "title": "#10226 improve ArrayByteBufferPool.Tracking"
+      },
+      {
+        "id": "01f8812dbb8b913ac3b4686a8c3deb05164a72cb",
+        "title": "#10226 improve testDownloadWithCloseMiddleOfContent debuggability by helping to discriminate the buffers by their content",
+        "skips": [
+          "NO_INTERESTING_PATHS_LEFT"
+        ]
+      },
+      {
+        "id": "2fcccef0c499c0a0931bf1d57f4c51b0f05e5943",
+        "title": "#10226 fix GZIPContentDecoder buffer leak of zero-capacity buffers"
+      },
+      {
+        "id": "f3a21cec6f57abd258f2bb74ea235cff212824c5",
+        "title": "#10226 fix heap dump",
+        "skips": [
+          "NO_INTERESTING_PATHS_LEFT"
+        ]
+      },
+      {
+        "id": "7083fa39275ebec8df342b2db3115dd02ee2cfe8",
+        "title": "#10226 restore leak tracking in tests",
+        "skips": [
+          "NO_INTERESTING_PATHS_LEFT"
+        ]
+      },
+      {
+        "id": "159238471b15c3e271ac952eb4834b7d76a2d0aa",
+        "title": "#10226 handle review comments"
+      },
+      {
+        "id": "1fff9787bd9776b388c3e0f0b09a582427ed0f0d",
+        "title": "#10226 - handle review comments"
+      },
+      {
+        "id": "18797fad5781b79011abd31470a287733e24a467",
+        "title": "#10226 add ability to disable leak tracking and disable currently known leaky threads",
+        "skips": [
+          "NO_INTERESTING_PATHS_LEFT"
+        ]
+      },
+      {
+        "id": "155137605a36dcf964d7a7466ff7e480a92319fa",
+        "title": "#10226 disable client leak tracking for H1 transports",
+        "skips": [
+          "NO_INTERESTING_PATHS_LEFT"
+        ]
+      },
+      {
+        "id": "44aa6036b343b9346fe582a192051eea7e18e84f",
+        "title": "#10226 assert using awaitility and fix heap dump cleanup when a leak is detected"
+      },
+      {
+        "id": "174c59e9a12e9ebdd40a43697f2759ce385a21d0",
+        "title": "#10226 assert using awaitility",
+        "skips": [
+          "NO_INTERESTING_PATHS_LEFT"
+        ]
+      },
+      {
+        "id": "83ee6387b8191a51053221e4a4dd5fe39cf4a003",
+        "title": "#10226 improve Tracking.Buffer dump"
+      },
+      {
+        "id": "a4e33a019f0765eb2396569684379ce625d9ed90",
+        "title": "#10226 disable leak tracking only for client/server or impacted transports",
+        "skips": [
+          "NO_INTERESTING_PATHS_LEFT"
+        ]
+      },
+      {
+        "id": "eece4b0fdeab0f829c737a91e2a86519476f6dec",
+        "title": "#10226 dump the heap when a buffer leak is detected",
+        "skips": [
+          "NO_INTERESTING_PATHS_LEFT"
+        ]
+      }
+    ],
+    "issues": [
+      {
+        "number": 10226,
+        "title": "Restore buffer leak tracking in tests."
+      }
+    ],
+    "skip": false,
+    "ref_number": 10226,
+    "ref_type": "ISSUE",
+    "ref_title": "Restore buffer leak tracking in tests.",
+    "labels": [
+      "Bug"
+    ]
+  },
+  {
+    "number": 27,
+    "authors": [
+      {
+        "github": "sbordet",
+        "name": "Simone Bordet",
+        "emails": [
+          "simone.bordet@gmail.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "17c36497714ed7d9ba5bb93ee82662c0f97fcbd3",
+        "title": "Fixes #10217 - Review ProxyConnectionFactory buffer management. (#10225)"
+      }
+    ],
+    "issues": [
+      {
+        "number": 10217,
+        "title": "Review ProxyConnectionFactory buffer management"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10225,
+        "title": "Fixes #10217 - Review ProxyConnectionFactory buffer management."
+      }
+    ],
+    "skip": false,
+    "ref_number": 10217,
+    "ref_type": "ISSUE",
+    "ref_title": "Review ProxyConnectionFactory buffer management",
+    "labels": [
+      "Bug"
+    ]
+  },
+  {
+    "number": 28,
+    "authors": [
+      {
+        "github": "gregw",
+        "name": "Greg Wilkins",
+        "emails": [
+          "gregw@webtide.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "5aea1e44b7c3d41e08c5b78e28e6b2ebb70d6213",
+        "title": "Experiment/12/improve default servlet (#10222)"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10222,
+        "title": "Experiment/12/improve default servlet"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10222,
+    "ref_type": "PULL_REQUEST",
+    "ref_title": "Experiment/12/improve default servlet",
+    "labels": []
+  },
+  {
+    "number": 29,
+    "authors": [
+      {
+        "github": "joakime",
+        "name": "Joakim Erdfelt",
+        "emails": [
+          "joakim.erdfelt@gmail.com",
+          "joakim@erdfelt.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "6702634494d0ca705604547f059d1fe3b35931c3",
+        "title": "Issue #10213 Ensuring proper usage of StartLog logging (to prevent accidental exceptions) (#10214)"
+      }
+    ],
+    "issues": [
+      {
+        "number": 10213,
+        "title": "UnknownFormatConversionException in `start.jar --debug` if path has `%` sign"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10214,
+        "title": "Issue #10213 - Ensuring proper usage of StartLog logging"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10213,
+    "ref_type": "ISSUE",
+    "ref_title": "UnknownFormatConversionException in `start.jar --debug` if path has `%` sign",
+    "labels": [
+      "Bug",
+      "Jetty 12"
+    ]
+  },
+  {
+    "number": 30,
+    "authors": [
+      {
+        "github": "gregw",
+        "name": "Greg Wilkins",
+        "emails": [
+          "gregw@webtide.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "16b00e2a1345cec045b066ed1469b65e4b5cde5a",
+        "title": "Allow better configuration of WebAppContext classloader (#10163)"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10163,
+        "title": "Allow better configuration of WebAppContext classloader"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10163,
+    "ref_type": "PULL_REQUEST",
+    "ref_title": "Allow better configuration of WebAppContext classloader",
+    "labels": [
+      "Sponsored"
+    ]
+  },
+  {
+    "number": 31,
+    "authors": [
+      {
+        "github": "gregw",
+        "name": "Greg Wilkins",
+        "emails": [
+          "gregw@webtide.com"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "cdf5035ab22f695af3084c5184abbe065c8c77ae",
+        "title": "Various Cleanup in ServletChannel (#10064)"
+      }
+    ],
+    "pull_requests": [
+      {
+        "number": 10064,
+        "title": "Various Cleanup in ServletChannel"
+      }
+    ],
+    "skip": false,
+    "ref_number": 10064,
+    "ref_type": "PULL_REQUEST",
+    "ref_title": "Various Cleanup in ServletChannel",
+    "labels": []
+  },
+  {
+    "number": 32,
+    "authors": [
+      {
+        "github": "lorban",
+        "name": "Ludovic Orban",
+        "emails": [
+          "lorban@bitronix.be"
+        ],
+        "committer": true
+      }
+    ],
+    "commits": [
+      {
+        "id": "4757333ed5a4730370f3e81112f277793b57a2d5",
+        "title": "#9900 accurate implementation of Request.getBeginNanoTime() for FCGI"
+      },
+      {
+        "id": "67ecd9f4a35a5fef37d31ff99f7fd99f2b2676ee",
+        "title": "#9900 handle review comments"
+      }
+    ],
+    "issues": [
+      {
+        "number": 9900,
+        "title": "Improve `Request.getBeginNanoTime()` accuracy"
+      }
+    ],
+    "skip": false,
+    "ref_number": 9900,
+    "ref_type": "ISSUE",
+    "ref_title": "Improve `Request.getBeginNanoTime()` accuracy",
+    "labels": [
+      "Performance",
+      "Enhancement"
+    ]
+  }
+]

@@ -44,6 +44,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
 import net.webtide.tools.github.Commit;
+import net.webtide.tools.github.CrossReference;
 import net.webtide.tools.github.GitHubApi;
 import net.webtide.tools.github.GitHubResourceNotFoundException;
 import net.webtide.tools.github.IssueEvents;
@@ -496,6 +497,15 @@ public class ChangelogTool implements AutoCloseable
                     if (!Strings.isNullOrEmpty(event.getCommitId()))
                     {
                         issue.addCommit(event.getCommitId());
+                    }
+                }
+                List<CrossReference> crossReferences = getGitHubApi().issueCrossReferences(githubOwner, githubRepoName, issue.getNum());
+                for (CrossReference crossReference : crossReferences)
+                {
+                    net.webtide.tools.github.Ref ref = crossReference.getBaseRef();
+                    if (ref != null)
+                    {
+                        issue.setBaseRef(ref.getName());
                     }
                 }
             }
