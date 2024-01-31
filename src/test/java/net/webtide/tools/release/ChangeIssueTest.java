@@ -80,7 +80,7 @@ public class ChangeIssueTest
     public void testIssueWithPullRequest() throws IOException, InterruptedException
     {
         GitHubApi github = GitHubApi.connect();
-        net.webtide.tools.github.Issue ghIssue = github.issue("eclipse", "jetty.project", 10330);
+        net.webtide.tools.github.Issue ghIssue = github.issue("jetty", "jetty.project", 10330);
         System.out.printf("ghIssue.pullRequest = %s%n", ghIssue.getPullRequest());
     }
 

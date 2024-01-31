@@ -204,7 +204,7 @@ public class ChangelogTool implements AutoCloseable
         return this.issueMap.values();
     }
 
-    public void save(Path outputDir) throws IOException
+    public void save(Path outputDir, boolean includeDependencyChanges) throws IOException
     {
         Gson gson = new GsonBuilder().setPrettyPrinting()
             .registerTypeAdapter(ZonedDateTime.class, new ISO8601TypeAdapter())
@@ -259,7 +259,7 @@ public class ChangelogTool implements AutoCloseable
         }
 
         Path markdownOutput = outputDir.resolve("changelog.md");
-        writeMarkdown(markdownOutput);
+        writeMarkdown(markdownOutput, includeDependencyChanges);
     }
 
     public void setVersionRange(String tagOldVersion, String tagNewVersion)
@@ -714,7 +714,7 @@ public class ChangelogTool implements AutoCloseable
             .collect(Collectors.toList());
     }
 
-    public void writeMarkdown(Path markdownOutput) throws IOException
+    public void writeMarkdown(Path markdownOutput, boolean includeDependencyChanges) throws IOException
     {
         try (BufferedWriter writer = Files.newBufferedWriter(markdownOutput, UTF_8);
              PrintWriter out = new PrintWriter(writer))
@@ -748,19 +748,23 @@ public class ChangelogTool implements AutoCloseable
             // resolve titles, ids, etc ....
             writeSection(out, "# Changelog", relevantChanges.stream().filter((c) ->
                 !c.hasLabel("dependencies")));
-            writeSection(out, "# Dependencies", relevantChanges.stream()
-                .filter((c) -> c.hasLabel("dependencies"))
-                .map(new ChangelogTool.DependencyBumpSimplifier())
-                .sorted(new ChangelogTool.DependencyBumpComparator())
-                .filter(new ChangelogTool.DistinctDependencyBumpRef())
-            );
+
+            if (includeDependencyChanges)
+            {
+                writeSection(out, "# Dependencies", relevantChanges.stream()
+                    .filter((c) -> c.hasLabel("dependencies"))
+                    .map(new ChangelogTool.DependencyBumpSimplifier())
+                    .sorted(new ChangelogTool.DependencyBumpComparator())
+                    .filter(new ChangelogTool.DistinctDependencyBumpRef())
+                );
+            }
         }
     }
 
     private void writeSection(PrintWriter out, String sectionName, Stream<Change> changesStream)
     {
         List<Change> changes = changesStream.collect(Collectors.toList());
-        if (changes.size() > 0)
+        if (!changes.isEmpty())
         {
             out.println();
             out.println(sectionName);

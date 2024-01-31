@@ -42,7 +42,8 @@ public class Main
                 Files.createDirectories(config.outputPath);
             }
 
-            changelog.save(config.outputPath);
+            changelog.save(config.outputPath, config.isIncludeDependencyChanges());
+            System.out.printf("Wrote changelog to %s%n", config.outputPath);
         }
     }
 }

@@ -91,4 +91,12 @@ public class Args extends HashMap<String, String>
             return defaultPath;
         return Paths.get(pathStr);
     }
+
+    public boolean getBoolean(String key, boolean defaultVal)
+    {
+        String boolStr = get(key);
+        if (boolStr == null)
+            return defaultVal;
+        return Boolean.parseBoolean(boolStr);
+    }
 }

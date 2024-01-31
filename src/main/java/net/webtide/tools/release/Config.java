@@ -51,6 +51,8 @@ public class Config
     // list of regex strings to apply for branch exclusions.
     // if commit belongs to matching exclusion, then that commit is excluded from changelog
     protected List<String> branchRegexExclusions = new ArrayList<>();
+    // include the list of dependency changes in the output
+    protected boolean includeDependencyChanges = false;
     // output path to generate changelog details
     protected Path outputPath;
 
@@ -87,6 +89,7 @@ public class Config
         config.setTagVersionPrior(args.getOrDefault("tag_version_prior", config.getTagVersionPrior()));
         config.setTagVersionCurrent(args.getOrDefault("tag_version_current", config.getTagVersionCurrent()));
         config.setOutputPath(args.getPath("output_path", config.getOutputPath()));
+        config.setIncludeDependencyChanges(args.getBoolean("includeDependencyChanges", false));
 
         return config;
     }
@@ -193,6 +196,16 @@ public class Config
     public void setBranchRegexExclusions(List<String> branchRegexExclusions)
     {
         this.branchRegexExclusions = branchRegexExclusions;
+    }
+
+    public boolean isIncludeDependencyChanges()
+    {
+        return includeDependencyChanges;
+    }
+
+    public void setIncludeDependencyChanges(boolean includeDependencyChanges)
+    {
+        this.includeDependencyChanges = includeDependencyChanges;
     }
 
     public Path getOutputPath()
