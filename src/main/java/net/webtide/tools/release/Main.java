@@ -43,7 +43,7 @@ public class Main
             }
 
             changelog.save(config.outputPath, config.isIncludeDependencyChanges());
-            System.out.printf("Wrote changelog to %s%n", config.outputPath);
+            System.out.printf("Wrote changelog to %s%n", config.outputPath.toAbsolutePath());
         }
     }
 }
