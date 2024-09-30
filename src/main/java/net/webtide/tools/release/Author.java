@@ -35,23 +35,6 @@ public class Author
         this.name = name;
     }
 
-    @Override
-    public boolean equals(Object o)
-    {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
-        Author author = (Author)o;
-        return Objects.equals(github, author.github);
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return Objects.hash(github);
-    }
-
     public String github()
     {
         return github;
@@ -120,5 +103,28 @@ public class Author
             return email.substring(0, idx);
         else
             return email;
+    }
+
+    @Override
+    public String toString() {
+        return "Author{" +
+                "github='" + github + '\'' +
+                ", name='" + name + '\'' +
+                ", emails=" + emails +
+                ", committer=" + committer +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Author author = (Author) o;
+        return Objects.equals(github, author.github);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(github);
     }
 }
