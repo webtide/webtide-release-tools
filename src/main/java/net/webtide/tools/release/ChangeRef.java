@@ -12,6 +12,7 @@
 
 package net.webtide.tools.release;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -43,7 +44,7 @@ public abstract class ChangeRef
 
     public Set<Skip> getSkipSet()
     {
-        return skipSet;
+        return skipSet == null ? Collections.emptySet() : skipSet;
     }
 
     public void addSkipReason(Skip skip)

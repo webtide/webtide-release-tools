@@ -367,4 +367,17 @@ public class Change
             return !skips.isEmpty();
         }
     }
+
+    @Override
+    public String toString() {
+        return "Change{" +
+                "number=" + number +
+                ", authors=" + authors +
+                ", pullRequests=" + pullRequests +
+                ", issues=" + issues +
+                ", skip=" + skip +
+                ", refTitle='" + refTitle + '\'' +
+                ", labels=" + labels +
+                '}';
+    }
 }

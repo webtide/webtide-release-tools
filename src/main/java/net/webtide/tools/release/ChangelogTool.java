@@ -47,9 +47,12 @@ import net.webtide.tools.github.Commit;
 import net.webtide.tools.github.CrossReference;
 import net.webtide.tools.github.GitHubApi;
 import net.webtide.tools.github.GitHubResourceNotFoundException;
+import net.webtide.tools.github.Issue;
 import net.webtide.tools.github.IssueEvents;
 import net.webtide.tools.github.Label;
+import net.webtide.tools.github.PullRequest;
 import net.webtide.tools.github.PullRequestCommits;
+import net.webtide.tools.github.PullRequests;
 import net.webtide.tools.github.gson.ISO8601TypeAdapter;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.LogCommand;
@@ -335,8 +338,7 @@ public class ChangelogTool implements AutoCloseable
         return null;
     }
 
-    public void resolveCommits() throws IOException, GitAPIException
-    {
+    public void resolveCommits() throws IOException, GitAPIException, InterruptedException {
         RevCommit commitOld = findCommitForTag(tagOldVersion);
         RevCommit commitNew = findCommitForTag(tagNewVersion);
         LOG.debug("commit log: {} .. {}", commitOld, commitNew);
@@ -355,9 +357,12 @@ public class ChangelogTool implements AutoCloseable
             changeCommit.setAuthor(author);
             changeCommit.setTitle(commit.getShortMessage());
             changeCommit.setBody(commit.getFullMessage());
-            if (isMergeCommit(commit))
+            // is this commit linked to a PullRequest?
+            PullRequests pullRequests = getGitHubApi().commitPullRequests(this.githubOwner, this.githubRepoName, changeCommit.getSha());
+            if (isMergeCommit(commit) && pullRequests.isEmpty())
                 changeCommit.addSkipReason(Skip.IS_MERGE_COMMIT);
-
+            if(!pullRequests.isEmpty())
+                changeCommit.addPullRequestRefs(pullRequests.stream().map(Issue::getNumber).collect(Collectors.toList()));
             count++;
         }
 
@@ -387,8 +392,7 @@ public class ChangelogTool implements AutoCloseable
         return predicate;
     }
 
-    private void collectIssueReferences(ChangeCommit commit)
-    {
+    private void collectIssueReferences(ChangeCommit commit) throws IOException, InterruptedException {
         Set<Integer> issueNums = new HashSet<>();
         issueNums.addAll(IssueScanner.scan(commit.getTitle()));
         issueNums.addAll(IssueScanner.scanResolutions(commit.getBody()));
@@ -402,10 +406,18 @@ public class ChangelogTool implements AutoCloseable
             }
             issue.addCommit(commit.getSha());
         }
+
+        PullRequests pullRequests = getGitHubApi().commitPullRequests(this.githubOwner, this.githubRepoName, commit.getSha());
+        if(!pullRequests.isEmpty())
+        {
+            commit.addPullRequestRefs(pullRequests.stream().map(Issue::getNumber).collect(Collectors.toList()));
+            pullRequests.forEach(pullRequest -> {
+                issueMap.putIfAbsent(pullRequest.getNumber(), new ChangeIssue(pullRequest.getNumber()));
+            });
+        }
     }
 
-    public void resolveIssues()
-    {
+    public void resolveIssues() throws IOException, InterruptedException {
         LOG.debug("Discover issue references");
 
         for (ChangeCommit changeCommit : commitMap.values())
@@ -471,12 +483,7 @@ public class ChangelogTool implements AutoCloseable
             // Discover any newly referenced issue for later resolve
             for (int issueNum : issueRefs)
             {
-                ChangeIssue ref = issueMap.get(issueNum);
-                if (ref == null)
-                {
-                    ref = new ChangeIssue(issueNum);
-                    issueMap.put(issueNum, ref);
-                }
+                issueMap.putIfAbsent(issueNum, new ChangeIssue(issueNum));
             }
 
             // Test labels
@@ -525,12 +532,11 @@ public class ChangelogTool implements AutoCloseable
         }
         catch (IOException | InterruptedException e)
         {
-            e.printStackTrace();
+            LOG.warn("Ignore", e);
         }
     }
 
-    public void resolveIssueCommits()
-    {
+    public void resolveIssueCommits() throws IOException, InterruptedException {
         List<ChangeIssue> relevantIssues = getRelevantKnownIssues();
 
         int issuesTotal = relevantIssues.size();
@@ -542,6 +548,24 @@ public class ChangelogTool implements AutoCloseable
         for (ChangeIssue issue : relevantIssues)
         {
             System.out.printf("\r%,d issues left (out of %,d) ...      ", issuesLeft--, issuesTotal);
+            boolean interestingLabel = false;
+            if(issue.getType() == IssueType.PULL_REQUEST )
+            {
+                PullRequest pullRequest = getGitHubApi().pullRequest(this.githubOwner, this.githubRepoName, issue.getNum());
+                // if the PR have a label and even in part of some exclusion we may want to include it into changelog
+                // properties file contain mime mapping
+                for (String excludeLabel : excludedLabels)
+                {
+                    if (pullRequest.getLabels().stream().anyMatch(label -> label.getName().equals(excludeLabel)))
+                    {
+                        issue.addSkipReason(Skip.EXCLUDED_LABEL);
+                    }
+                }
+                if(!pullRequest.getLabels().isEmpty() && !issue.getSkipSet().contains(Skip.EXCLUDED_LABEL))
+                {
+                    interestingLabel = true;
+                }
+            }
 
             for (String commitSha : issue.getCommits())
             {
@@ -554,7 +578,7 @@ public class ChangelogTool implements AutoCloseable
                         .filter(Predicate.not(this::isExcludedPath))
                         .collect(Collectors.toSet());
                     commit.setFiles(diffPaths);
-                    if (diffPaths.isEmpty())
+                    if (diffPaths.isEmpty() && !interestingLabel)
                     {
                         commit.addSkipReason(Skip.NO_INTERESTING_PATHS_LEFT);
                     }
