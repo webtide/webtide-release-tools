@@ -124,4 +124,12 @@ public class ChangeIssue extends ChangeRef
     {
         return labels.contains(label);
     }
+
+    @Override
+    public String toString() {
+        return "ChangeIssue{" +
+                "num=" + num +
+                ", title='" + title + '\'' +
+                '}';
+    }
 }
