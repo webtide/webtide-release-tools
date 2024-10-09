@@ -42,7 +42,7 @@ public class Config
     // tag of prior version
     protected String tagVersionPrior;
     // tag of current version (the one we are generating the changelog for)
-    protected String tagVersionCurrent;
+    protected String refVersionCurrent;
     // list of labels (on issues and prs) to exclude from changelog
     protected List<String> labelExclusions = new ArrayList<>();
     // list of regex strings to apply to commit paths to exclude from changelog
@@ -87,7 +87,7 @@ public class Config
         config.setGithubRepoOwner(args.getOrDefault("github_repo_owner", config.getGithubRepoOwner()));
         config.setBranch(args.getOrDefault("branch", config.getBranch()));
         config.setTagVersionPrior(args.getOrDefault("tag_version_prior", config.getTagVersionPrior()));
-        config.setTagVersionCurrent(args.getOrDefault("tag_version_current", config.getTagVersionCurrent()));
+        config.setRefVersionCurrent(args.getOrDefault("ref_version_current", config.getRefVersionCurrent()));
         config.setOutputPath(args.getPath("output_path", config.getOutputPath()));
         config.setIncludeDependencyChanges(args.getBoolean("includeDependencyChanges", false));
 
@@ -158,14 +158,14 @@ public class Config
         this.tagVersionPrior = tagVersionPrior;
     }
 
-    public String getTagVersionCurrent()
+    public String getRefVersionCurrent()
     {
-        return tagVersionCurrent;
+        return refVersionCurrent;
     }
 
-    public void setTagVersionCurrent(String tagVersionCurrent)
+    public void setRefVersionCurrent(String refVersionCurrent)
     {
-        this.tagVersionCurrent = tagVersionCurrent;
+        this.refVersionCurrent = refVersionCurrent;
     }
 
     public List<String> getLabelExclusions()

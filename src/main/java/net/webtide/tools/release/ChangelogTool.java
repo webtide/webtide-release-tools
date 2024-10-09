@@ -79,7 +79,7 @@ public class ChangelogTool implements AutoCloseable
     private GitHubApi github;
     private String branch;
     private String tagOldVersion;
-    private String tagNewVersion;
+    private String refCurrentVersion;
     private Map<Integer, ChangeIssue> issueMap = new HashMap<>();
     private Map<String, ChangeCommit> commitMap = new HashMap<>();
     private List<Predicate<String>> branchExclusion = new ArrayList<>();
@@ -100,7 +100,7 @@ public class ChangelogTool implements AutoCloseable
         this(config.getRepoPath());
         setGithubRepo(config.getGithubRepoOwner(), config.getGithubRepoName());
         setBranch(config.getBranch());
-        setVersionRange(config.getTagVersionPrior(), config.getTagVersionCurrent());
+        setVersionRange(config.getTagVersionPrior(), config.getRefVersionCurrent());
         config.getLabelExclusions().forEach(this::addLabelExclusion);
         config.getCommitPathRegexExclusions().forEach(this::addCommitPathRegexExclusion);
         config.getBranchRegexExclusions().forEach(this::addBranchRegexExclusion);
@@ -265,10 +265,10 @@ public class ChangelogTool implements AutoCloseable
         writeMarkdown(markdownOutput, includeDependencyChanges);
     }
 
-    public void setVersionRange(String tagOldVersion, String tagNewVersion)
+    public void setVersionRange(String tagOldVersion, String refCurrentVersion)
     {
         this.tagOldVersion = tagOldVersion;
-        this.tagNewVersion = tagNewVersion;
+        this.refCurrentVersion = refCurrentVersion;
     }
 
     public void setGithubRepo(String owner, String repoName)
@@ -338,9 +338,35 @@ public class ChangelogTool implements AutoCloseable
         return null;
     }
 
+    private RevCommit findCommitForCurrent() throws IOException
+    {
+        try (RevWalk walk = new RevWalk(repository))
+        {
+            List<String> refNames = new ArrayList<>();
+            if (refCurrentVersion.contains("/"))
+                refNames.add(refCurrentVersion);
+            refNames.add("refs/tags/" + refCurrentVersion);
+            refNames.add("refs/heads/" + refCurrentVersion);
+            refNames.add("refs/remotes/" + refCurrentVersion);
+            refNames.add(refCurrentVersion); // for commit-ids
+
+            for (String refName : refNames)
+            {
+                LOG.debug("Finding commit ref for refs/tags/{}", refName);
+                Ref ref = repository.findRef(refName);
+                if (ref != null)
+                {
+                    return walk.parseCommit(ref.getObjectId());
+                }
+            }
+        }
+
+        throw new ChangelogException("Ref not found: " + refCurrentVersion);
+    }
+
     public void resolveCommits() throws IOException, GitAPIException, InterruptedException {
         RevCommit commitOld = findCommitForTag(tagOldVersion);
-        RevCommit commitNew = findCommitForTag(tagNewVersion);
+        RevCommit commitNew = findCommitForCurrent();
         LOG.debug("commit log: {} .. {}", commitOld, commitNew);
 
         int count = 0;

@@ -4,7 +4,7 @@ java -jar target/webtide-release-tools-1.0-SNAPSHOT-hybrid.jar \
    --repo_path=/home/joakim/code/jetty/jetty.project-alt/ \
    --includeDependencyChanges=false \
    --tag_version_prior=jetty-9.4.54.v20240208 \
-   --tag_version_current=jetty-9.4.55.v20240627 \
+   --ref_version_current=jetty-9.4.55.v20240627 \
    --output_path=logs/9.4.55
 
 
@@ -13,7 +13,7 @@ java -jar target/webtide-release-tools-1.0-SNAPSHOT-hybrid.jar \
    --repo_path=/home/joakim/code/jetty/jetty.project-alt/ \
    --includeDependencyChanges=false \
    --tag_version_prior=jetty-10.0.22 \
-   --tag_version_current=jetty-10.0.23 \
+   --ref_version_current=jetty-10.0.23 \
    --output_path=logs/10.0.23
 
 
@@ -22,7 +22,7 @@ java -jar target/webtide-release-tools-1.0-SNAPSHOT-hybrid.jar \
    --repo_path=/home/joakim/code/jetty/jetty.project-alt/ \
    --includeDependencyChanges=false \
    --tag_version_prior=jetty-11.0.21 \
-   --tag_version_current=jetty-11.0.22 \
+   --ref_version_current=jetty-11.0.22 \
    --output_path=logs/11.0.22
 
 
@@ -30,6 +30,6 @@ java -jar target/webtide-release-tools-1.0-SNAPSHOT-hybrid.jar \
    --config_file=configs/config-12.0.x.json \
    --repo_path=/home/joakim/code/jetty/jetty.project-alt/ \
    --includeDependencyChanges=false \
-   --tag_version_prior=jetty-12.0.11 \
-   --tag_version_current=jetty-12.0.12 \
-   --output_path=logs/12.0.12
+   --tag_version_prior=jetty-12.0.13 \
+   --ref_version_current=origin/jetty-12.0.x \
+   --output_path=logs/12.0.14
