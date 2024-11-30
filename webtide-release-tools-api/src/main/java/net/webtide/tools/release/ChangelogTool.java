@@ -207,42 +207,42 @@ public class ChangelogTool implements AutoCloseable
         return this.issueMap.values();
     }
 
-    public void save(Path outputDir, boolean includeDependencyChanges) throws IOException
+    public void save(SaveRequest saveRequest) throws IOException
     {
         Gson gson = new GsonBuilder().setPrettyPrinting()
             .registerTypeAdapter(ZonedDateTime.class, new ISO8601TypeAdapter())
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .create();
 
-        Path authorsLog = outputDir.resolve("authors-scan.json");
+        Path authorsLog = saveRequest.outputDir().resolve("authors-scan.json");
         try (BufferedWriter writer = Files.newBufferedWriter(authorsLog, UTF_8);
              JsonWriter jsonWriter = gson.newJsonWriter(writer))
         {
             gson.toJson(authors, Authors.class, jsonWriter);
         }
 
-        Path issueLog = outputDir.resolve("change-issues.json");
+        Path issueLog = saveRequest.outputDir().resolve("change-issues.json");
         try (BufferedWriter writer = Files.newBufferedWriter(issueLog, UTF_8);
              JsonWriter jsonWriter = gson.newJsonWriter(writer))
         {
             gson.toJson(issueMap.values(), Set.class, jsonWriter);
         }
 
-        Path commitsLog = outputDir.resolve("change-commits.json");
+        Path commitsLog = saveRequest.outputDir().resolve("change-commits.json");
         try (BufferedWriter writer = Files.newBufferedWriter(commitsLog, UTF_8);
              JsonWriter jsonWriter = gson.newJsonWriter(writer))
         {
             gson.toJson(commitMap.values(), Set.class, jsonWriter);
         }
 
-        Path changeLog = outputDir.resolve("change-groups.json");
+        Path changeLog = saveRequest.outputDir().resolve("change-groups.json");
         try (BufferedWriter writer = Files.newBufferedWriter(changeLog, UTF_8);
              JsonWriter jsonWriter = gson.newJsonWriter(writer))
         {
             gson.toJson(changes, List.class, jsonWriter);
         }
 
-        Path changePaths = outputDir.resolve("change-paths.log");
+        Path changePaths = saveRequest.outputDir().resolve("change-paths.log");
         try (BufferedWriter writer = Files.newBufferedWriter(changePaths))
         {
             Set<String> changedFiles = new HashSet<>();
@@ -261,8 +261,12 @@ public class ChangelogTool implements AutoCloseable
             System.out.printf("Found %,d Files changed in the various commits%n", changedFiles.size());
         }
 
-        Path markdownOutput = outputDir.resolve("changelog.md");
-        writeMarkdown(markdownOutput, includeDependencyChanges);
+        switch (saveRequest.outputFormat()){
+            case MARKDOWN: writeMarkdown(saveRequest);
+            case TAG_TXT: writeVersionTagTxt(saveRequest);
+
+        }
+
     }
 
     public void setVersionRange(String tagOldVersion, String refCurrentVersion)
@@ -340,28 +344,37 @@ public class ChangelogTool implements AutoCloseable
 
     private RevCommit findCommitForCurrent() throws IOException
     {
-        try (RevWalk walk = new RevWalk(repository))
+        // current version null as we are interested only by current head
+        if (refCurrentVersion != null)
         {
-            List<String> refNames = new ArrayList<>();
-            if (refCurrentVersion.contains("/"))
-                refNames.add(refCurrentVersion);
-            refNames.add("refs/tags/" + refCurrentVersion);
-            refNames.add("refs/heads/" + refCurrentVersion);
-            refNames.add("refs/remotes/" + refCurrentVersion);
-            refNames.add(refCurrentVersion); // for commit-ids
-
-            for (String refName : refNames)
+            try (RevWalk walk = new RevWalk(repository))
             {
-                LOG.debug("Finding commit ref for refs/tags/{}", refName);
-                Ref ref = repository.findRef(refName);
-                if (ref != null)
-                {
-                    return walk.parseCommit(ref.getObjectId());
+                List<String> refNames = new ArrayList<>();
+                if (refCurrentVersion.contains("/"))
+                    refNames.add(refCurrentVersion);
+                refNames.add("refs/tags/" + refCurrentVersion);
+                refNames.add("refs/heads/" + refCurrentVersion);
+                refNames.add("refs/remotes/" + refCurrentVersion);
+                refNames.add("refs/" + branch + "/HEAD");
+                refNames.add(refCurrentVersion); // for commit-ids
+
+                for (String refName : refNames) {
+                    LOG.debug("Finding commit ref for refs/tags/{}", refName);
+                    Ref ref = repository.findRef(refName);
+                    if (ref != null) {
+                        return walk.parseCommit(ref.getObjectId());
+                    }
                 }
             }
         }
 
-        throw new ChangelogException("Ref not found: " + refCurrentVersion);
+        // nothing found so we return head of branch
+        var headRef = repository.findRef(branch);
+        var headHash = headRef.getObjectId();
+        try (RevWalk walk = new RevWalk(repository))
+        {
+            return walk.parseCommit(headHash);
+        }
     }
 
     public void resolveCommits() throws IOException, GitAPIException, InterruptedException {
@@ -764,15 +777,34 @@ public class ChangelogTool implements AutoCloseable
             .collect(Collectors.toList());
     }
 
-    public void writeMarkdown(Path markdownOutput, boolean includeDependencyChanges) throws IOException
+    public void writeVersionTagTxt(SaveRequest saveRequest) throws IOException
     {
+        // FIXME configurable
+        Path versionTagTxt = saveRequest.outputDir().resolve("version-tag.txt");
+        try (BufferedWriter writer = Files.newBufferedWriter(versionTagTxt, UTF_8);
+             PrintWriter out = new PrintWriter(writer))
+        {
+            List<Change> relevantChanges = changes.stream()
+                    .filter(Predicate.not(Change::isSkip))
+                    .sorted(Comparator.comparingInt(Change::getRefNumber).reversed())
+                    .toList();
+
+            writeSection(out, " " + saveRequest.projectVersion() + " - " + saveRequest.date(), relevantChanges.stream().filter((c) ->
+                    !c.hasLabel("dependencies")));
+
+        }
+    }
+
+    public void writeMarkdown(SaveRequest saveRequest) throws IOException
+    {
+        Path markdownOutput = saveRequest.outputDir().resolve("changelog.md");
         try (BufferedWriter writer = Files.newBufferedWriter(markdownOutput, UTF_8);
              PrintWriter out = new PrintWriter(writer))
         {
             List<Change> relevantChanges = changes.stream()
                 .filter(Predicate.not(Change::isSkip))
                 .sorted(Comparator.comparingInt(Change::getRefNumber).reversed())
-                .collect(Collectors.toList());
+                .toList();
 
             // Collect list of community member participation
             Set<String> community = new HashSet<>();
@@ -799,7 +831,7 @@ public class ChangelogTool implements AutoCloseable
             writeSection(out, "# Changelog", relevantChanges.stream().filter((c) ->
                 !c.hasLabel("dependencies")));
 
-            if (includeDependencyChanges)
+            if (saveRequest.includeDependencyChanges())
             {
                 writeSection(out, "# Dependencies", relevantChanges.stream()
                     .filter((c) -> c.hasLabel("dependencies"))
@@ -813,7 +845,7 @@ public class ChangelogTool implements AutoCloseable
 
     private void writeSection(PrintWriter out, String sectionName, Stream<Change> changesStream)
     {
-        List<Change> changes = changesStream.collect(Collectors.toList());
+        List<Change> changes = changesStream.toList();
         if (!changes.isEmpty())
         {
             out.println();
@@ -822,7 +854,7 @@ public class ChangelogTool implements AutoCloseable
 
             for (Change change : changes)
             {
-                out.printf("* #%d - ", change.getRefNumber());
+                out.printf("+ #%d - ", change.getRefNumber());
                 out.print(change.getRefTitle());
                 Set<String> authors = change.getAuthors().stream().filter(Predicate.not(Author::committer)).map(Author::toNiceName).collect(Collectors.toSet());
                 if (!authors.isEmpty())

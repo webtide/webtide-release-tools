@@ -42,7 +42,11 @@ public class Main
                 Files.createDirectories(config.outputPath);
             }
 
-            changelog.save(config.outputPath, config.isIncludeDependencyChanges());
+            var saveRequest = SaveRequestBuilder.builder().outputDir(config.outputPath)
+                    .includeDependencyChanges(config.includeDependencyChanges)
+                    .outputFormat(SaveRequest.OUTPUT_FORMAT.MARKDOWN)
+                    .build();
+            changelog.save(saveRequest);
             System.out.printf("Wrote changelog to %s%n", config.outputPath.toAbsolutePath());
         }
     }
