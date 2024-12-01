@@ -12,7 +12,6 @@
 
 package net.webtide.tools.release.plugins;
 
-import net.webtide.tools.release.ChangelogTool;
 import net.webtide.tools.release.Config;
 import net.webtide.tools.release.SaveRequest;
 import net.webtide.tools.release.SaveRequestBuilder;
@@ -23,7 +22,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -32,7 +30,6 @@ import java.util.Date;
  * for this particular release.  A file suitable to use as the git tag
  * message body, in tagging the release.
  */
-@SuppressWarnings("unused")
 @Mojo(name = "tag", defaultPhase = LifecyclePhase.PROCESS_RESOURCES, threadSafe = true)
 public class TagMojo extends AbstractReleaseToolsPlugin {
 
@@ -44,43 +41,20 @@ public class TagMojo extends AbstractReleaseToolsPlugin {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-
-        Config config = buildConfig();
-
-        try (ChangelogTool changelog = new ChangelogTool(config))
+        try
         {
-            // equivalent of git log <old>..<new>
-            changelog.resolveCommits();
-
-            // resolve all title/body fields (in commits, issues, and prs) for textual issues references (recursively)
-            changelog.resolveIssues();
-
-            // resolve all of the issue and pull requests commits
-            changelog.resolveIssueCommits();
-
-            // link up commits / issues / pull requests
-            changelog.linkActivity();
-
-            System.out.printf("Found %,d commit entries%n", changelog.getCommits().size());
-            System.out.printf("Found %,d issue/pr references%n", changelog.getIssues().size());
-
-            if (!Files.exists(config.getOutputPath()))
-            {
-                Files.createDirectories(config.getOutputPath());
-            }
-
             SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
-
-
+            Config config = buildConfig();
             var saveRequest = SaveRequestBuilder.builder()
                             .outputDir(config.getOutputPath())
                             .includeDependencyChanges(config.isIncludeDependencyChanges())
                             .outputFormat(SaveRequest.OUTPUT_FORMAT.TAG_TXT)
                             .projectVersion(version)
+                            .versionTagTxt(versionTagOutputFile.toPath())
                             .date(sdf.format(new Date()))
                             .build();
+            doExecute(saveRequest);
 
-            changelog.save(saveRequest);
             getLog().info("Wrote version tag txt to" + versionTagOutputFile);
         } catch (Exception e) {
             throw new MojoExecutionException("Failed to tag changelog", e);

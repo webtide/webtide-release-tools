@@ -779,9 +779,7 @@ public class ChangelogTool implements AutoCloseable
 
     public void writeVersionTagTxt(SaveRequest saveRequest) throws IOException
     {
-        // FIXME configurable
-        Path versionTagTxt = saveRequest.outputDir().resolve("version-tag.txt");
-        try (BufferedWriter writer = Files.newBufferedWriter(versionTagTxt, UTF_8);
+        try (BufferedWriter writer = Files.newBufferedWriter(saveRequest.versionTagTxt(), UTF_8);
              PrintWriter out = new PrintWriter(writer))
         {
             List<Change> relevantChanges = changes.stream()
