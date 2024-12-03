@@ -13,6 +13,7 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>webtide-github-api</module>
     <module>webtide-release-tools-api</module>
     <module>webtide-release-tools-plugin</module>
   </modules>
@@ -42,6 +43,11 @@
       <dependency>
         <groupId>net.webtide.tools</groupId>
         <artifactId>webtide-release-tools-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.webtide.tools</groupId>
+        <artifactId>webtide-github-api</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>
