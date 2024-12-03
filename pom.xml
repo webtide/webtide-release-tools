@@ -10,12 +10,17 @@
 
   <name>webtide-release-tools</name>
   <description>Release Tool Suite</description>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>webtide-github-api</module>
+    <module>webtide-release-tools-api</module>
+    <module>webtide-release-tools-plugin</module>
+  </modules>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.release>17</maven.compiler.release>
     <maven.assembly.plugin.version>3.3.0</maven.assembly.plugin.version>
     <maven.clean.plugin.version>3.1.0</maven.clean.plugin.version>
     <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
@@ -33,40 +38,20 @@
     <license.plugin.version>3.0</license.plugin.version>
   </properties>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.eclipse.jgit</groupId>
-      <artifactId>org.eclipse.jgit</artifactId>
-      <version>6.6.0.202305301015-r</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-api</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>1.4.8</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <version>2.10.1</version>
-    </dependency>
-    <dependency>
-      <groupId>net.webtide.tools</groupId>
-      <artifactId>webtide-github-api</artifactId>
-      <version>1.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.jetty.toolchain</groupId>
-      <artifactId>jetty-test-helper</artifactId>
-      <version>6.1</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>net.webtide.tools</groupId>
+        <artifactId>webtide-release-tools-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.webtide.tools</groupId>
+        <artifactId>webtide-github-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <build>
     <pluginManagement>
@@ -175,50 +160,6 @@
               </includes>
               <excludes>
               </excludes>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.4</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>net.webtide.tools.release.Main</mainClass>
-                </transformer>
-              </transformers>
-              <shadedArtifactAttached>true</shadedArtifactAttached>
-              <shadedClassifierName>hybrid</shadedClassifierName>
-              <artifactSet>
-                <includes>
-                  <include>net.webtide.tools:webtide-github-api</include>
-                  <include>com.google.*:*</include>
-                  <include>com.jcraft:*</include>
-                  <include>org.eclipse.jgit:*</include>
-                  <include>org.bouncycastle:*</include>
-                  <include>org.slf4j:*</include>
-                  <include>ch.qos.logback:*</include>
-                </includes>
-              </artifactSet>
-              <filters>
-                <filter>
-                  <artifact>*:*</artifact>
-                  <excludes>
-                    <exclude>META-INF/*.SF</exclude>
-                    <exclude>META-INF/*.RSA</exclude>
-                    <exclude>META-INF/*.DSA</exclude>
-                    <exclude>META-INF/MANIFEST.MF</exclude>
-                  </excludes>
-                </filter>
-              </filters>
             </configuration>
           </execution>
         </executions>
