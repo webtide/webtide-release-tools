@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import io.soabase.recordbuilder.core.RecordBuilder;
 
 @RecordBuilder
-public record SaveRequest(Path outputDir, boolean includeDependencyChanges, OUTPUT_FORMAT outputFormat, String projectVersion, String date, Path versionTagTxt) {
+public record SaveRequest(Path outputDir, boolean includeDependencyChanges, OUTPUT_FORMAT outputFormat, String projectVersion, String date, Path outputFile) {
 
     public enum OUTPUT_FORMAT {
         MARKDOWN, TAG_TXT

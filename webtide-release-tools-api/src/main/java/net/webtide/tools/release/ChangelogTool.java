@@ -779,7 +779,7 @@ public class ChangelogTool implements AutoCloseable
 
     public void writeVersionTagTxt(SaveRequest saveRequest) throws IOException
     {
-        try (BufferedWriter writer = Files.newBufferedWriter(saveRequest.versionTagTxt(), UTF_8);
+        try (BufferedWriter writer = Files.newBufferedWriter(saveRequest.outputFile(), UTF_8);
              PrintWriter out = new PrintWriter(writer))
         {
             List<Change> relevantChanges = changes.stream()
@@ -795,8 +795,7 @@ public class ChangelogTool implements AutoCloseable
 
     public void writeMarkdown(SaveRequest saveRequest) throws IOException
     {
-        Path markdownOutput = saveRequest.outputDir().resolve("changelog.md");
-        try (BufferedWriter writer = Files.newBufferedWriter(markdownOutput, UTF_8);
+        try (BufferedWriter writer = Files.newBufferedWriter(saveRequest.outputFile(), UTF_8);
              PrintWriter out = new PrintWriter(writer))
         {
             List<Change> relevantChanges = changes.stream()

@@ -30,14 +30,14 @@ import java.util.Date;
  * for this particular release.  A file suitable to use as the git tag
  * message body, in tagging the release.
  */
-@Mojo(name = "tag", defaultPhase = LifecyclePhase.PROCESS_RESOURCES, threadSafe = true)
-public class TagMojo extends AbstractReleaseToolsPlugin {
+@Mojo(name = "gh-release", defaultPhase = LifecyclePhase.PROCESS_RESOURCES, threadSafe = true)
+public class GitHubReleaseMojo extends AbstractReleaseToolsPlugin {
 
     /**
-     * The generated version-tag.txt file.
+     * The generated changelog file.
      */
-    @Parameter(property = "webtide.release.tools.tag.output.file", defaultValue = "${project.build.directory}/version-tag.txt")
-    protected File versionTagOutputFile;
+    @Parameter(property = "webtide.release.tools.gh-release.output.file", defaultValue = "${project.build.directory}/changelog.md")
+    protected File changelogOutputFile;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -46,16 +46,16 @@ public class TagMojo extends AbstractReleaseToolsPlugin {
             SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
             Config config = buildConfig();
             var saveRequest = SaveRequestBuilder.builder()
-                            .outputDir(config.getOutputPath())
-                            .includeDependencyChanges(config.isIncludeDependencyChanges())
-                            .outputFormat(SaveRequest.OUTPUT_FORMAT.TAG_TXT)
-                            .projectVersion(version)
-                            .outputFile(versionTagOutputFile.toPath())
-                            .date(sdf.format(new Date()))
-                            .build();
+                    .outputDir(config.getOutputPath())
+                    .includeDependencyChanges(config.isIncludeDependencyChanges())
+                    .outputFormat(SaveRequest.OUTPUT_FORMAT.MARKDOWN)
+                    .projectVersion(version)
+                    .outputFile(changelogOutputFile.toPath())
+                    .date(sdf.format(new Date()))
+                    .build();
             doExecute(saveRequest);
 
-            getLog().info("Wrote version tag txt to" + versionTagOutputFile);
+            getLog().info("Wrote version tag txt to" + changelogOutputFile);
         } catch (Exception e) {
             throw new MojoExecutionException("Failed to tag changelog", e);
         }
