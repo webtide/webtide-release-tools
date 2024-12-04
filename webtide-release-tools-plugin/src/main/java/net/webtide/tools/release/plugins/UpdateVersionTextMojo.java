@@ -44,9 +44,9 @@ public class UpdateVersionTextMojo extends TagMojo {
         // TODO add a flag to reuse already generated files
         super.execute();
         try {
-            Files.copy(originalVersionTextOutputFile.toPath(), versionTextOutputFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            byte[] verstonTxttEntry = Files.readAllBytes(versionTagOutputFile.toPath());
-            Files.write(versionTextOutputFile.toPath(), verstonTxttEntry, StandardOpenOption.WRITE);
+            Files.deleteIfExists(versionTextOutputFile.toPath());
+            Files.write(versionTextOutputFile.toPath(), Files.readAllBytes(versionTagOutputFile.toPath()), StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
+            Files.write(versionTextOutputFile.toPath(), Files.readAllBytes(originalVersionTextOutputFile.toPath()), StandardOpenOption.APPEND);
         } catch (IOException e) {
             throw new MojoExecutionException(e);
         }
