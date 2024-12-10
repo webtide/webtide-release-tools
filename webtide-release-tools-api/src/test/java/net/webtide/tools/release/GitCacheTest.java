@@ -27,12 +27,12 @@ public class GitCacheTest
     @Test
     public void testGitCache() throws IOException
     {
-        String sha = "adee2dd17af1561057e5857637c4f12c87fd3b43";
+        String sha = "03984b49615e1cec8ba7edf82f0117a35dc0869a";
         Path cloneDir = GitUtil.findGitRoot();
         Git git = Git.open(cloneDir.toFile());
         GitCache cache = new GitCache(git);
         Set<String> diffPaths = cache.getPaths(sha);
-        assertEquals(27, diffPaths.stream().filter((filename) -> filename.startsWith("src/")).count());
+        assertEquals(35, diffPaths.stream().filter((filename) -> filename.startsWith("src/")).count());
         Set<String> branchesContaining = cache.getBranchesContaining(sha);
         assertNotNull(branchesContaining);
     }
