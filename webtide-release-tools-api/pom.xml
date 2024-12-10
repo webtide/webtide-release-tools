@@ -37,7 +37,7 @@
     <dependency>
       <groupId>io.soabase.record-builder</groupId>
       <artifactId>record-builder-core</artifactId>
-      <version>41</version>
+      <version>44</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
