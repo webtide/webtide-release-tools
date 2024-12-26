@@ -12,6 +12,7 @@
 
 package net.webtide.tools.release.plugins;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,8 +36,8 @@ public abstract class AbstractReleaseToolsPlugin extends AbstractMojo
     protected String version;
     @Parameter(required = true)
     private Path configFile;
-    @Parameter(defaultValue = "target/release-output")
-    private Path outputDir;
+    @Parameter(readonly = true, defaultValue = "${project.build.directory}")
+    protected File projectBuildDirectory;
     @Parameter(property = "webtide.release.tools.refVersionCurrent")
     private String refVersionCurrent;
     @Parameter(property = "webtide.release.tools.tagVersionPrior")
@@ -85,7 +86,7 @@ public abstract class AbstractReleaseToolsPlugin extends AbstractMojo
             try
             {
                 this.config = Config.loadConfig(configFile);
-                this.config.setOutputPath(outputDir);
+                this.config.setOutputPath(projectBuildDirectory.toPath());
                 this.config.setRefVersionCurrent(refVersionCurrent);
                 this.config.setTagVersionPrior(tagVersionPrior);
                 this.config.setRepoPath(Paths.get("./"));

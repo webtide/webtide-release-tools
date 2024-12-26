@@ -15,11 +15,23 @@ package net.webtide.tools.release;
 import java.nio.file.Path;
 
 public record SaveRequest(Path outputDir, boolean includeDependencyChanges, OUTPUT_FORMAT outputFormat, String projectVersion,
-                          String date, Path outputFile)
+                          String date)
 {
-
     public enum OUTPUT_FORMAT
     {
-        MARKDOWN, TAG_TXT
+        MARKDOWN("changelog.md"),
+        TAG_TXT("version-tag.txt");
+
+        String filename;
+
+        OUTPUT_FORMAT(String filename)
+        {
+            this.filename = filename;
+        }
+
+        public String getFilename()
+        {
+            return filename;
+        }
     }
 }

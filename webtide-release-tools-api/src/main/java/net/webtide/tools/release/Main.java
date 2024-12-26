@@ -13,7 +13,8 @@
 package net.webtide.tools.release;
 
 import java.nio.file.Files;
-import java.nio.file.Path;
+
+import static net.webtide.tools.release.SaveRequest.OUTPUT_FORMAT.MARKDOWN;
 
 public class Main
 {
@@ -45,14 +46,12 @@ public class Main
 
             String projectVersion = null;
             String date = null;
-            Path outputFile = null;
 
             SaveRequest saveRequest = new SaveRequest(config.outputPath,
                 config.includeDependencyChanges,
-                SaveRequest.OUTPUT_FORMAT.MARKDOWN,
+                MARKDOWN,
                 projectVersion,
-                date,
-                outputFile);
+                date);
             changelog.save(saveRequest);
             System.out.printf("Wrote changelog to %s%n", config.outputPath.toAbsolutePath());
         }

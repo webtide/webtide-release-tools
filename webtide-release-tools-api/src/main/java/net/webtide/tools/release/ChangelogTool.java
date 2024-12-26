@@ -443,7 +443,7 @@ public class ChangelogTool implements AutoCloseable
                 if (commit.getFiles() != null)
                     changedFiles.addAll(commit.getFiles());
             }
-            for (String filename : changedFiles.stream().sorted().collect(Collectors.toList()))
+            for (String filename : changedFiles.stream().sorted().toList())
             {
                 writer.write(filename);
                 writer.write("\n");
@@ -479,7 +479,7 @@ public class ChangelogTool implements AutoCloseable
 
     public void writeMarkdown(SaveRequest saveRequest) throws IOException
     {
-        try (BufferedWriter writer = Files.newBufferedWriter(saveRequest.outputFile(), UTF_8);
+        try (BufferedWriter writer = Files.newBufferedWriter(saveRequest.outputDir().resolve(saveRequest.outputFormat().getFilename()), UTF_8);
              PrintWriter out = new PrintWriter(writer))
         {
             List<Change> relevantChanges = changes.stream()
@@ -526,7 +526,7 @@ public class ChangelogTool implements AutoCloseable
 
     public void writeVersionTagTxt(SaveRequest saveRequest) throws IOException
     {
-        try (BufferedWriter writer = Files.newBufferedWriter(saveRequest.outputFile(), UTF_8);
+        try (BufferedWriter writer = Files.newBufferedWriter(saveRequest.outputDir().resolve(saveRequest.outputFormat().getFilename()), UTF_8);
              PrintWriter out = new PrintWriter(writer))
         {
             List<Change> relevantChanges = changes.stream()

@@ -15,6 +15,7 @@ package net.webtide.tools.release.plugins;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -22,6 +23,8 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+
+import static net.webtide.tools.release.SaveRequest.OUTPUT_FORMAT.TAG_TXT;
 
 @Mojo(name = "update-version-text", defaultPhase = LifecyclePhase.PACKAGE, threadSafe = true)
 public class UpdateVersionTextMojo extends TagMojo
@@ -47,7 +50,8 @@ public class UpdateVersionTextMojo extends TagMojo
         try
         {
             Files.deleteIfExists(versionTextOutputFile.toPath());
-            Files.write(versionTextOutputFile.toPath(), Files.readAllBytes(versionTagOutputFile.toPath()), StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
+            Path versionTagOutputFile = projectBuildDirectory.toPath().resolve(TAG_TXT.getFilename());
+            Files.write(versionTextOutputFile.toPath(), Files.readAllBytes(versionTagOutputFile), StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
             Files.write(versionTextOutputFile.toPath(), Files.readAllBytes(originalVersionTextOutputFile.toPath()), StandardOpenOption.APPEND);
         }
         catch (IOException e)

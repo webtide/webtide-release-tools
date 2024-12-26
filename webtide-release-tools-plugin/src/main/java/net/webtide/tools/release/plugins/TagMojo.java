@@ -12,7 +12,6 @@
 
 package net.webtide.tools.release.plugins;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -22,7 +21,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
+
+import static net.webtide.tools.release.SaveRequest.OUTPUT_FORMAT.TAG_TXT;
 
 /**
  * Produce a target/version-tag.txt which represents the changes
@@ -32,13 +32,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 @Mojo(name = "tag", defaultPhase = LifecyclePhase.PROCESS_RESOURCES, threadSafe = true)
 public class TagMojo extends AbstractReleaseToolsPlugin
 {
-
-    /**
-     * The generated version-tag.txt file.
-     */
-    @Parameter(property = "webtide.release.tools.tag.output.file", defaultValue = "${project.build.directory}/version-tag.txt")
-    protected File versionTagOutputFile;
-
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException
     {
@@ -49,14 +42,13 @@ public class TagMojo extends AbstractReleaseToolsPlugin
             SaveRequest saveRequest = new SaveRequest(
                 config.getOutputPath(),
                 config.isIncludeDependencyChanges(),
-                SaveRequest.OUTPUT_FORMAT.TAG_TXT,
+                TAG_TXT,
                 version,
-                sdf.format(new Date()),
-                versionTagOutputFile.toPath()
+                sdf.format(new Date())
             );
             doExecute(saveRequest);
 
-            getLog().info("Wrote version tag txt to" + versionTagOutputFile);
+            getLog().info("Wrote version tag txt to" + config.getOutputPath().resolve(TAG_TXT.getFilename()));
         }
         catch (Exception e)
         {
