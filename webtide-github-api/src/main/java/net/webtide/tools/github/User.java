@@ -29,19 +29,9 @@ public class User
     protected ZonedDateTime createdAt;
     protected ZonedDateTime updatedAt;
 
-    public String getLogin()
+    public String getBio()
     {
-        return login;
-    }
-
-    public String getType()
-    {
-        return type;
-    }
-
-    public String getName()
-    {
-        return name;
+        return bio;
     }
 
     public String getCompany()
@@ -49,9 +39,9 @@ public class User
         return company;
     }
 
-    public String getLocation()
+    public ZonedDateTime getCreatedAt()
     {
-        return location;
+        return createdAt;
     }
 
     public String getEmail()
@@ -59,14 +49,29 @@ public class User
         return email;
     }
 
-    public String getBio()
+    public String getLocation()
     {
-        return bio;
+        return location;
     }
 
-    public ZonedDateTime getCreatedAt()
+    public String getLogin()
     {
-        return createdAt;
+        return login;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public Map<String, Boolean> getPermissions()
+    {
+        return permissions;
+    }
+
+    public String getType()
+    {
+        return type;
     }
 
     public ZonedDateTime getUpdatedAt()
@@ -77,11 +82,6 @@ public class User
     public boolean isSiteAdmin()
     {
         return siteAdmin;
-    }
-
-    public Map<String, Boolean> getPermissions()
-    {
-        return permissions;
     }
 
     @Override

@@ -31,6 +31,34 @@ public class ChangeCommit extends ChangeRef
     private Set<Integer> issueRefs;
     private Set<Integer> pullRequestRefs;
 
+    public void addIssueRef(int ref)
+    {
+        if (this.issueRefs == null)
+            this.issueRefs = new HashSet<>();
+        this.issueRefs.add(ref);
+    }
+
+    public void addIssueRefs(Collection<Integer> refs)
+    {
+        if (this.issueRefs == null)
+            this.issueRefs = new HashSet<>();
+        this.issueRefs.addAll(refs);
+    }
+
+    public void addPullRequestRef(int ref)
+    {
+        if (this.pullRequestRefs == null)
+            this.pullRequestRefs = new HashSet<>();
+        this.pullRequestRefs.add(ref);
+    }
+
+    public void addPullRequestRefs(Collection<Integer> refs)
+    {
+        if (this.pullRequestRefs == null)
+            this.pullRequestRefs = new HashSet<>();
+        this.pullRequestRefs.addAll(refs);
+    }
+
     public Author getAuthor()
     {
         return author;
@@ -82,32 +110,15 @@ public class ChangeCommit extends ChangeRef
         return files;
     }
 
-    public void addIssueRef(int ref)
+    public void setFiles(Collection<String> files)
     {
-        if (this.issueRefs == null)
-            this.issueRefs = new HashSet<>();
-        this.issueRefs.add(ref);
-    }
-
-    public void addIssueRefs(Collection<Integer> refs)
-    {
-        if (this.issueRefs == null)
-            this.issueRefs = new HashSet<>();
-        this.issueRefs.addAll(refs);
-    }
-
-    public void addPullRequestRefs(Collection<Integer> refs)
-    {
-        if (this.pullRequestRefs == null)
-            this.pullRequestRefs = new HashSet<>();
-        this.pullRequestRefs.addAll(refs);
-    }
-
-    public void addPullRequestRef(int ref)
-    {
-        if (this.pullRequestRefs == null)
-            this.pullRequestRefs = new HashSet<>();
-        this.pullRequestRefs.add(ref);
+        if (files == null)
+            this.files = null;
+        else
+        {
+            this.files = new ArrayList<>();
+            this.files.addAll(files);
+        }
     }
 
     public Set<Integer> getIssueRefs()
@@ -118,17 +129,6 @@ public class ChangeCommit extends ChangeRef
     public Set<Integer> getPullRequestRefs()
     {
         return pullRequestRefs;
-    }
-
-    public void setFiles(Collection<String> files)
-    {
-        if (files == null)
-            this.files = null;
-        else
-        {
-            this.files = new ArrayList<>();
-            this.files.addAll(files);
-        }
     }
 
     public String getSha()

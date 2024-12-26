@@ -17,6 +17,29 @@ import java.util.Map;
 
 public class RateLimits
 {
+    protected Map<String, Rate> resources = new HashMap<>();
+    protected Rate rate;
+
+    public Rate getRate()
+    {
+        return rate;
+    }
+
+    public Rate getResourceLimit(String key)
+    {
+        return resources.get(key);
+    }
+
+    @Override
+    public String toString()
+    {
+        final StringBuilder sb = new StringBuilder("RateLimits[");
+        sb.append("rate=").append(rate);
+        sb.append(", [").append(resources).append("]");
+        sb.append("]");
+        return sb.toString();
+    }
+
     public static class Rate
     {
         protected int limit;
@@ -29,11 +52,6 @@ public class RateLimits
             return limit;
         }
 
-        public int getUsed()
-        {
-            return used;
-        }
-
         public int getRemaining()
         {
             return remaining;
@@ -42,6 +60,11 @@ public class RateLimits
         public long getReset()
         {
             return reset;
+        }
+
+        public int getUsed()
+        {
+            return used;
         }
 
         @Override
@@ -53,28 +76,5 @@ public class RateLimits
             return String.format("Rate[u:%d/l:%d(r:%d),reset=%s]",
                 used, limit, remaining, human);
         }
-    }
-
-    protected Map<String, Rate> resources = new HashMap<>();
-    protected Rate rate;
-
-    public Rate getResourceLimit(String key)
-    {
-        return resources.get(key);
-    }
-
-    public Rate getRate()
-    {
-        return rate;
-    }
-
-    @Override
-    public String toString()
-    {
-        final StringBuilder sb = new StringBuilder("RateLimits[");
-        sb.append("rate=").append(rate);
-        sb.append(", [").append(resources).append("]");
-        sb.append("]");
-        return sb.toString();
     }
 }

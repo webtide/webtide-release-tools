@@ -35,36 +35,14 @@ public class Author
         this.name = name;
     }
 
-    public String github()
+    public boolean committer()
     {
-        return github;
+        return committer;
     }
 
-    public Author github(String github)
+    public Author committer(boolean committer)
     {
-        this.github = github;
-        return this;
-    }
-
-    public String name()
-    {
-        return name;
-    }
-
-    public Author name(String name)
-    {
-        this.name = name;
-        return this;
-    }
-
-    public List<String> emails()
-    {
-        return emails;
-    }
-
-    public Author emails(List<String> emails)
-    {
-        this.emails = emails;
+        this.committer = committer;
         return this;
     }
 
@@ -80,14 +58,53 @@ public class Author
         return this;
     }
 
-    public boolean committer()
+    public List<String> emails()
     {
-        return committer;
+        return emails;
     }
 
-    public Author committer(boolean committer)
+    public Author emails(List<String> emails)
     {
-        this.committer = committer;
+        this.emails = emails;
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Author author = (Author)o;
+        return Objects.equals(github, author.github);
+    }
+
+    public String github()
+    {
+        return github;
+    }
+
+    public Author github(String github)
+    {
+        this.github = github;
+        return this;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hashCode(github);
+    }
+
+    public String name()
+    {
+        return name;
+    }
+
+    public Author name(String name)
+    {
+        this.name = name;
         return this;
     }
 
@@ -106,25 +123,13 @@ public class Author
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return "Author{" +
-                "github='" + github + '\'' +
-                ", name='" + name + '\'' +
-                ", emails=" + emails +
-                ", committer=" + committer +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Author author = (Author) o;
-        return Objects.equals(github, author.github);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(github);
+            "github='" + github + '\'' +
+            ", name='" + name + '\'' +
+            ", emails=" + emails +
+            ", committer=" + committer +
+            '}';
     }
 }

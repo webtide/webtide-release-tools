@@ -21,5 +21,4 @@ public class Cards extends ArrayList<Card>
     {
         return super.add(card);
     }
-
 }

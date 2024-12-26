@@ -26,6 +26,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class Authors extends ArrayList<Author>
 {
+    private Map<String, Integer> emailMap = new HashMap<>();
+
+    public Authors()
+    {
+    }
+
     public static Authors load() throws IOException
     {
         URL url = Authors.class.getClassLoader().getResource("authors.json");
@@ -36,12 +42,6 @@ public class Authors extends ArrayList<Author>
             Authors authors = gson.fromJson(reader, Authors.class);
             return authors;
         }
-    }
-
-    private Map<String, Integer> emailMap = new HashMap<>();
-
-    public Authors()
-    {
     }
 
     @Override
@@ -60,6 +60,17 @@ public class Authors extends ArrayList<Author>
         return get(idx);
     }
 
+    public boolean isCommitter(String email)
+    {
+        Integer idx = emailMap.get(email);
+        if (idx == null)
+            return false;
+        Author author = get(idx);
+        if (author == null)
+            return false;
+        return author.committer();
+    }
+
     private void updateEmailMap()
     {
         emailMap.clear();
@@ -72,16 +83,5 @@ public class Authors extends ArrayList<Author>
                 emailMap.put(email, i);
             }
         }
-    }
-
-    public boolean isCommitter(String email)
-    {
-        Integer idx = emailMap.get(email);
-        if (idx == null)
-            return false;
-        Author author = get(idx);
-        if (author == null)
-            return false;
-        return author.committer();
     }
 }

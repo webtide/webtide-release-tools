@@ -20,14 +20,6 @@ import com.google.common.base.Strings;
 
 public class Args extends HashMap<String, String>
 {
-    public static class ArgException extends RuntimeException
-    {
-        public ArgException(String format, Object... args)
-        {
-            super(String.format(format, args));
-        }
-    }
-
     public Args(String... args)
     {
         super();
@@ -51,19 +43,12 @@ public class Args extends HashMap<String, String>
         }
     }
 
-    public String getOptional(String key)
+    public boolean getBoolean(String key, boolean defaultVal)
     {
-        return get(key);
-    }
-
-    public String getRequired(String key)
-    {
-        String value = get(key);
-        if (Strings.isNullOrEmpty(value))
-        {
-            throw new ArgException("Missing required value for option --%s=<value>", key);
-        }
-        return value;
+        String boolStr = get(key);
+        if (boolStr == null)
+            return defaultVal;
+        return Boolean.parseBoolean(boolStr);
     }
 
     public int getInteger(String key)
@@ -84,6 +69,11 @@ public class Args extends HashMap<String, String>
         }
     }
 
+    public String getOptional(String key)
+    {
+        return get(key);
+    }
+
     public Path getPath(String key, Path defaultPath)
     {
         String pathStr = get(key);
@@ -92,11 +82,21 @@ public class Args extends HashMap<String, String>
         return Paths.get(pathStr);
     }
 
-    public boolean getBoolean(String key, boolean defaultVal)
+    public String getRequired(String key)
     {
-        String boolStr = get(key);
-        if (boolStr == null)
-            return defaultVal;
-        return Boolean.parseBoolean(boolStr);
+        String value = get(key);
+        if (Strings.isNullOrEmpty(value))
+        {
+            throw new ArgException("Missing required value for option --%s=<value>", key);
+        }
+        return value;
+    }
+
+    public static class ArgException extends RuntimeException
+    {
+        public ArgException(String format, Object... args)
+        {
+            super(String.format(format, args));
+        }
     }
 }

@@ -23,25 +23,14 @@ import com.google.gson.stream.JsonWriter;
 
 public class ISO8601TypeAdapter extends TypeAdapter<ZonedDateTime>
 {
-    @Override
-    public void write(JsonWriter out, ZonedDateTime value) throws IOException
+    public static ZonedDateTime parseISO8601(String timestamp)
     {
-        if (value == null)
-        {
-            out.nullValue();
-            return;
-        }
-        out.value(toISO8601(value));
+        return ZonedDateTime.parse(timestamp, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 
     public static String toISO8601(ZonedDateTime zonedDateTime)
     {
         return zonedDateTime.toOffsetDateTime().toString();
-    }
-
-    public static ZonedDateTime parseISO8601(String timestamp)
-    {
-        return ZonedDateTime.parse(timestamp, DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 
     @Override
@@ -53,5 +42,16 @@ public class ISO8601TypeAdapter extends TypeAdapter<ZonedDateTime>
             return null;
         }
         return parseISO8601(in.nextString());
+    }
+
+    @Override
+    public void write(JsonWriter out, ZonedDateTime value) throws IOException
+    {
+        if (value == null)
+        {
+            out.nullValue();
+            return;
+        }
+        out.value(toISO8601(value));
     }
 }

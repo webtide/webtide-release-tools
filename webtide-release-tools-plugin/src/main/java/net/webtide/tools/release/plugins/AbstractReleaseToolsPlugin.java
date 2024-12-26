@@ -12,64 +12,44 @@
 
 package net.webtide.tools.release.plugins;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import net.webtide.tools.release.ChangelogTool;
 import net.webtide.tools.release.Config;
 import net.webtide.tools.release.SaveRequest;
-import net.webtide.tools.release.SaveRequestBuilder;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-public abstract class AbstractReleaseToolsPlugin extends AbstractMojo  {
-
-    @Parameter(required = true)
-    private Path configFile;
-
-    @Parameter(defaultValue = "target/release-output")
-    private Path outputDir;
-
-    @Parameter(property = "webtide.release.tools.refVersionCurrent")
-    private String refVersionCurrent;
-
-    @Parameter(property = "webtide.release.tools.tagVersionPrior")
-    private String tagVersionPrior;
+public abstract class AbstractReleaseToolsPlugin extends AbstractMojo
+{
 
     /**
      * The maven project version.
      */
     @Parameter(property = "webtide.release.tools.version.section", defaultValue = "${project.version}", required = true)
     protected String version;
-
+    @Parameter(required = true)
+    private Path configFile;
+    @Parameter(defaultValue = "target/release-output")
+    private Path outputDir;
+    @Parameter(property = "webtide.release.tools.refVersionCurrent")
+    private String refVersionCurrent;
+    @Parameter(property = "webtide.release.tools.tagVersionPrior")
+    private String tagVersionPrior;
     private Config config;
 
-    protected Config buildConfig() throws MojoExecutionException {
-        if(this.config == null) {
-            try {
-                this.config = Config.loadConfig(configFile);
-                this.config.setOutputPath(outputDir);
-                this.config.setRefVersionCurrent(refVersionCurrent);
-                this.config.setTagVersionPrior(tagVersionPrior);
-                this.config.setRepoPath(Paths.get("./"));
-            } catch (IOException e) {
-                throw new MojoExecutionException(e.getMessage(), e);
-            }
-        }
-        return config;
-    }
-
-    public void doExecute(SaveRequest saveRequest) throws MojoExecutionException, MojoFailureException {
+    public void doExecute(SaveRequest saveRequest) throws MojoExecutionException, MojoFailureException
+    {
 
         Config config = buildConfig();
 
-        try (ChangelogTool changelog = new ChangelogTool(config)) {
+        try (ChangelogTool changelog = new ChangelogTool(config))
+        {
             // equivalent of git log <old>..<new>
             changelog.resolveCommits();
 
@@ -85,14 +65,36 @@ public abstract class AbstractReleaseToolsPlugin extends AbstractMojo  {
             System.out.printf("Found %,d commit entries%n", changelog.getCommits().size());
             System.out.printf("Found %,d issue/pr references%n", changelog.getIssues().size());
 
-            if (!Files.exists(config.getOutputPath())) {
+            if (!Files.exists(config.getOutputPath()))
+            {
                 Files.createDirectories(config.getOutputPath());
             }
 
             changelog.save(saveRequest);
-
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             throw new MojoExecutionException("Failed to tag changelog", e);
         }
+    }
+
+    protected Config buildConfig() throws MojoExecutionException
+    {
+        if (this.config == null)
+        {
+            try
+            {
+                this.config = Config.loadConfig(configFile);
+                this.config.setOutputPath(outputDir);
+                this.config.setRefVersionCurrent(refVersionCurrent);
+                this.config.setTagVersionPrior(tagVersionPrior);
+                this.config.setRepoPath(Paths.get("./"));
+            }
+            catch (IOException e)
+            {
+                throw new MojoExecutionException(e.getMessage(), e);
+            }
+        }
+        return config;
     }
 }

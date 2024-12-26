@@ -43,39 +43,9 @@ public class Repository
     protected int openIssuesCount;
     protected String defaultBranch;
 
-    public String getName()
+    public String getCloneUrl()
     {
-        return name;
-    }
-
-    public String getFullName()
-    {
-        return fullName;
-    }
-
-    public boolean isPrivateFlag()
-    {
-        return privateFlag;
-    }
-
-    public User getOwner()
-    {
-        return owner;
-    }
-
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public boolean isFork()
-    {
-        return fork;
-    }
-
-    public String getUrl()
-    {
-        return url;
+        return cloneUrl;
     }
 
     public ZonedDateTime getCreatedAt()
@@ -83,24 +53,14 @@ public class Repository
         return createdAt;
     }
 
-    public ZonedDateTime getUpdatedAt()
+    public String getDefaultBranch()
     {
-        return updatedAt;
+        return defaultBranch;
     }
 
-    public ZonedDateTime getPushedAt()
+    public String getDescription()
     {
-        return pushedAt;
-    }
-
-    public int getStargazersCount()
-    {
-        return stargazersCount;
-    }
-
-    public int getWatchersCount()
-    {
-        return watchersCount;
+        return description;
     }
 
     public int getForksCount()
@@ -108,39 +68,9 @@ public class Repository
         return forksCount;
     }
 
-    public String getLanguage()
+    public String getFullName()
     {
-        return language;
-    }
-
-    public long getSize()
-    {
-        return size;
-    }
-
-    public String getMirrorUrl()
-    {
-        return mirrorUrl;
-    }
-
-    public boolean isDisabled()
-    {
-        return disabled;
-    }
-
-    public boolean isArchived()
-    {
-        return archived;
-    }
-
-    public int getOpenIssuesCount()
-    {
-        return openIssuesCount;
-    }
-
-    public String getDefaultBranch()
-    {
-        return defaultBranch;
+        return fullName;
     }
 
     public String getGitUrl()
@@ -148,13 +78,83 @@ public class Repository
         return gitUrl;
     }
 
+    public String getLanguage()
+    {
+        return language;
+    }
+
+    public String getMirrorUrl()
+    {
+        return mirrorUrl;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public int getOpenIssuesCount()
+    {
+        return openIssuesCount;
+    }
+
+    public User getOwner()
+    {
+        return owner;
+    }
+
+    public ZonedDateTime getPushedAt()
+    {
+        return pushedAt;
+    }
+
+    public long getSize()
+    {
+        return size;
+    }
+
     public String getSshUrl()
     {
         return sshUrl;
     }
 
-    public String getCloneUrl()
+    public int getStargazersCount()
     {
-        return cloneUrl;
+        return stargazersCount;
+    }
+
+    public ZonedDateTime getUpdatedAt()
+    {
+        return updatedAt;
+    }
+
+    public String getUrl()
+    {
+        return url;
+    }
+
+    public int getWatchersCount()
+    {
+        return watchersCount;
+    }
+
+    public boolean isArchived()
+    {
+        return archived;
+    }
+
+    public boolean isDisabled()
+    {
+        return disabled;
+    }
+
+    public boolean isFork()
+    {
+        return fork;
+    }
+
+    public boolean isPrivateFlag()
+    {
+        return privateFlag;
     }
 }

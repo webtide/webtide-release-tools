@@ -118,11 +118,6 @@ public class Change
         return refNumber;
     }
 
-    public IssueType getRefType()
-    {
-        return refType;
-    }
-
     public String getRefTitle()
     {
         return refTitle;
@@ -133,14 +128,14 @@ public class Change
         this.refTitle = title;
     }
 
+    public IssueType getRefType()
+    {
+        return refType;
+    }
+
     public Set<Integer> getRefsAssociated()
     {
         return refsAssociated;
-    }
-
-    public boolean isSkip()
-    {
-        return skip;
     }
 
     public boolean hasIssues()
@@ -148,9 +143,19 @@ public class Change
         return (issues != null) && (!issues.isEmpty());
     }
 
+    public boolean hasLabel(String labelName)
+    {
+        return labels.contains(labelName);
+    }
+
     public boolean hasPRs()
     {
         return (pullRequests != null) && (!pullRequests.isEmpty());
+    }
+
+    public boolean isSkip()
+    {
+        return skip;
     }
 
     public void normalize(IssueType titlePriority)
@@ -206,6 +211,20 @@ public class Change
         }
     }
 
+    @Override
+    public String toString()
+    {
+        return "Change{" +
+            "number=" + number +
+            ", authors=" + authors +
+            ", pullRequests=" + pullRequests +
+            ", issues=" + issues +
+            ", skip=" + skip +
+            ", refTitle='" + refTitle + '\'' +
+            ", labels=" + labels +
+            '}';
+    }
+
     private boolean normalizeRefByIssue()
     {
         Optional<NumTitle> ref = issues.stream()
@@ -256,10 +275,6 @@ public class Change
             // Didn't find a relevant PR
             return false;
         }
-    }
-
-    public boolean hasLabel(String labelName) {
-        return labels.contains(labelName);
     }
 
     public static class RefTitle
@@ -366,18 +381,5 @@ public class Change
                 return false;
             return !skips.isEmpty();
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Change{" +
-                "number=" + number +
-                ", authors=" + authors +
-                ", pullRequests=" + pullRequests +
-                ", issues=" + issues +
-                ", skip=" + skip +
-                ", refTitle='" + refTitle + '\'' +
-                ", labels=" + labels +
-                '}';
     }
 }

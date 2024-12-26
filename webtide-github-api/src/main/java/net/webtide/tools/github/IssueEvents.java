@@ -25,11 +25,6 @@ public class IssueEvents extends ArrayList<IssueEvents.IssueEvent>
         protected String commitId;
         protected ZonedDateTime createdAt;
 
-        public String getEvent()
-        {
-            return event;
-        }
-
         public User getActor()
         {
             return actor;
@@ -48,6 +43,11 @@ public class IssueEvents extends ArrayList<IssueEvents.IssueEvent>
         public ZonedDateTime getCreatedAt()
         {
             return createdAt;
+        }
+
+        public String getEvent()
+        {
+            return event;
         }
     }
 }

@@ -48,15 +48,6 @@ public class PersistentCache implements Cache
         }
     }
 
-    private Path toJsonPath(String path)
-    {
-        String relativePath = path;
-        if (relativePath.startsWith("/"))
-            relativePath = relativePath.substring(1);
-
-        return this.root.resolve(relativePath + ".json");
-    }
-
     public String getCached(String path) throws IOException
     {
         Path cachedPath = toJsonPath(path);
@@ -74,11 +65,6 @@ public class PersistentCache implements Cache
         return body;
     }
 
-    public void saveNotFound(String path) throws IOException
-    {
-        save(path, "-");
-    }
-
     public void save(String path, String body) throws IOException
     {
         Path destFile = toJsonPath(path);
@@ -88,5 +74,19 @@ public class PersistentCache implements Cache
             Files.createDirectories(parentDir);
         }
         Files.writeString(toJsonPath(path), body, UTF_8, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+    }
+
+    public void saveNotFound(String path) throws IOException
+    {
+        save(path, "-");
+    }
+
+    private Path toJsonPath(String path)
+    {
+        String relativePath = path;
+        if (relativePath.startsWith("/"))
+            relativePath = relativePath.substring(1);
+
+        return this.root.resolve(relativePath + ".json");
     }
 }

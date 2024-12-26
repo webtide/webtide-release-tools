@@ -106,82 +106,37 @@ public class ChangelogTool implements AutoCloseable
         config.getBranchRegexExclusions().forEach(this::addBranchRegexExclusion);
     }
 
-    public static class DistinctRefTitle implements Predicate<Change>
+    /**
+     * If commit has specific branch, do not include it in the results.
+     */
+    public void addBranchExclusion(Predicate<String> predicate)
     {
-        private Map<String, Boolean> seen = new ConcurrentHashMap<>();
-
-        @Override
-        public boolean test(Change change)
-        {
-            String title = change.getRefTitle();
-            return seen.putIfAbsent(title, Boolean.TRUE) == null;
-        }
+        this.branchExclusion.add(predicate);
     }
 
-    public static class DistinctDependencyBumpRef implements Predicate<Change>
+    /**
+     * Exclude paths on commit with this predicate.
+     * If the resulting commit is devoid of paths as a result, it is flagged as skipped.
+     */
+    public void addCommitPathExclusionFilter(Predicate<String> predicate)
     {
-        private Map<String, Boolean> bumps = new ConcurrentHashMap<>();
-        private Pattern patternBump = Pattern.compile("^Bump (.*) to (.*)$");
-
-        @Override
-        public boolean test(Change change)
-        {
-            String title = change.getRefTitle();
-            Matcher matcher = patternBump.matcher(title);
-            if (matcher.find())
-            {
-                String depName = matcher.group(1);
-                return bumps.putIfAbsent(depName, Boolean.TRUE) == null;
-            }
-
-            // allow non-matching through.
-            return true;
-        }
+        Objects.requireNonNull(predicate, "predicate");
+        this.commitPathExclusionFilters.add(predicate);
     }
 
-    public static class DependencyBumpComparator implements Comparator<Change>
+    /**
+     * Exclude paths on commit with this predicate.
+     * If the resulting commit is devoid of paths as a result, it is flagged as skipped.
+     */
+    public void addCommitPathRegexExclusion(String regex)
     {
-        private Pattern patternBump = Pattern.compile("^Bump (.*) to (.*)$");
-
-        @Override
-        public int compare(Change c1, Change c2)
-        {
-            Matcher matcher1 = patternBump.matcher(c1.getRefTitle());
-            Matcher matcher2 = patternBump.matcher(c2.getRefTitle());
-
-            if (matcher1.find())
-            {
-                if (matcher2.find())
-                {
-                    int diff = matcher1.group(1).compareTo(matcher2.group(1));
-                    if (diff != 0)
-                        return diff;
-                    return matcher2.group(2).compareTo(matcher1.group(2));
-                }
-            }
-
-            return c1.getRefTitle().compareTo(c2.getRefTitle());
-        }
+        Objects.requireNonNull(regex, "regex");
+        this.commitPathExclusionFilters.add((filename) -> filename.matches(regex));
     }
 
-    public static class DependencyBumpSimplifier implements Function<Change, Change>
+    public void addLabelExclusion(String label)
     {
-        private Pattern patternBump = Pattern.compile("^Bump (.*) from (.*) to (.*)$");
-
-        @Override
-        public Change apply(Change change)
-        {
-            Matcher matcher = patternBump.matcher(change.getRefTitle());
-            if (matcher.find())
-            {
-                String depName = matcher.group(1);
-                String latestVersion = matcher.group(3);
-                String replacementTitle = String.format("Bump %s to %s", depName, latestVersion);
-                change.setRefTitle(replacementTitle);
-            }
-            // return same change.
-            return change;
-        }
+        this.excludedLabels.add(label);
     }
 
     @Override
@@ -190,6 +145,20 @@ public class ChangelogTool implements AutoCloseable
         this.gitCache.close();
         this.repository.close();
         this.git.close();
+    }
+
+    public ChangeIssue findRelevantIssue(Set<Integer> nums)
+    {
+        for (int num : nums)
+        {
+            ChangeIssue issue = this.issueMap.get(num);
+            if (issue == null)
+                continue;
+            if (issue.isSkipped())
+                continue;
+            return issue;
+        }
+        return null;
     }
 
     public Collection<ChangeCommit> getCommits()
@@ -205,6 +174,226 @@ public class ChangelogTool implements AutoCloseable
     public Collection<ChangeIssue> getIssues()
     {
         return this.issueMap.values();
+    }
+
+    public List<ChangeIssue> getRelevantKnownIssues()
+    {
+        return issueMap.values().stream()
+            .filter((issue) -> !issue.isSkipped())
+            .filter((issue) -> issue.getType() != IssueType.UNKNOWN)
+            .filter((issue) -> branch.equals(issue.getBaseRef()))
+            .sorted(Comparator.comparing(ChangeIssue::getNum).reversed())
+            .collect(Collectors.toList());
+    }
+
+    public List<ChangeIssue> getRelevantPullRequests()
+    {
+        return issueMap.values().stream()
+            .filter((issue) -> !issue.isSkipped())
+            .filter((issue) -> issue.getType() == IssueType.PULL_REQUEST)
+            .filter((issue) -> branch.equals(issue.getBaseRef()))
+            .sorted(Comparator.comparing(ChangeIssue::getNum).reversed())
+            .collect(Collectors.toList());
+    }
+
+    public void linkActivity()
+    {
+        LOG.debug("Connecting up {} issues to {} commits", issueMap.size(), commitMap.size());
+
+        int connectedIssues = 0;
+        int connectedPullRequests = 0;
+        Set<String> uniqueCommits = new HashSet<>();
+
+        // Back reference the issues into the commits
+        for (ChangeIssue issue : issueMap.values())
+        {
+            // Does issue have relevance?
+            boolean hasRelevance = false;
+            for (String commitSha : issue.getCommits())
+            {
+                // Only pull in commits found via log, don't create new ones.
+                // This is done to avoid referencing commits outside of the log range.
+                String sha = commitSha.toLowerCase(Locale.US);
+                ChangeCommit changeCommit = commitMap.get(sha);
+                if (changeCommit != null)
+                {
+                    if (issue.getType() == IssueType.ISSUE)
+                    {
+                        connectedIssues++;
+                        uniqueCommits.add(sha);
+                        changeCommit.addIssueRef(issue.getNum());
+                    }
+                    else if (issue.getType() == IssueType.PULL_REQUEST)
+                    {
+                        connectedPullRequests++;
+                        uniqueCommits.add(sha);
+                        changeCommit.addPullRequestRef(issue.getNum());
+                    }
+
+                    if (!changeCommit.isSkipped())
+                    {
+                        hasRelevance = true;
+                    }
+                }
+            }
+            if (!hasRelevance)
+            {
+                issue.addSkipReason(Skip.NO_RELEVANT_COMMITS);
+            }
+
+            // special handling for pull requests
+            if (issue.getType() == IssueType.PULL_REQUEST)
+            {
+                if (!this.branch.equals(issue.getBaseRef()))
+                {
+                    issue.addSkipReason(Skip.NOT_CORRECT_BASE_REF);
+                }
+            }
+        }
+
+        LOG.debug("Connected {} commits to {} issues and {} pull requests", uniqueCommits.size(), connectedIssues, connectedPullRequests);
+
+        // Create Change list
+        int changeId = 0;
+        for (ChangeIssue issue : getRelevantKnownIssues())
+        {
+            if (issue.isSkipped() || issue.hasChangeRef())
+                continue;
+
+            Change change = new Change(changeId++);
+            // add commits
+            issue.getCommits().forEach((commitSha) -> updateChangeCommit(change, commitSha));
+            // add issues & pull requests
+            issue.getReferencedIssues().forEach((issueNum) -> updateChangeIssues(change, issueNum));
+            this.changes.add(change);
+        }
+
+        this.changes.forEach((change) -> change.normalize(IssueType.ISSUE));
+    }
+
+    public void resolveCommits() throws IOException, GitAPIException, InterruptedException
+    {
+        RevCommit commitOld = findCommitForTag(tagOldVersion);
+        RevCommit commitNew = findCommitForCurrent();
+        LOG.debug("commit log: {} .. {}", commitOld, commitNew);
+
+        int count = 0;
+
+        LogCommand logCommand = git.log().addRange(commitOld, commitNew);
+
+        for (RevCommit commit : logCommand.call())
+        {
+            Author author = getAuthor(authors, commit);
+
+            ChangeCommit changeCommit = getCommit(commit.getId().getName());
+
+            changeCommit.setCommitTime(ZonedDateTime.ofInstant(Instant.ofEpochMilli(commit.getCommitTime()), ZoneId.systemDefault()));
+            changeCommit.setAuthor(author);
+            changeCommit.setTitle(commit.getShortMessage());
+            changeCommit.setBody(commit.getFullMessage());
+            // is this commit linked to a PullRequest?
+            PullRequests pullRequests = getGitHubApi().commitPullRequests(this.githubOwner, this.githubRepoName, changeCommit.getSha());
+            if (isMergeCommit(commit) && pullRequests.isEmpty())
+                changeCommit.addSkipReason(Skip.IS_MERGE_COMMIT);
+            if (!pullRequests.isEmpty())
+                changeCommit.addPullRequestRefs(pullRequests.stream().map(Issue::getNumber).collect(Collectors.toList()));
+            count++;
+        }
+
+        LOG.debug("Found {} commits", count);
+    }
+
+    public void resolveIssueCommits() throws IOException, InterruptedException
+    {
+        List<ChangeIssue> relevantIssues = getRelevantKnownIssues();
+
+        int issuesTotal = relevantIssues.size();
+        int issuesLeft = issuesTotal;
+        System.out.printf("Resolving commit branches and paths on %,d issues ...%n", issuesLeft);
+
+        Predicate<String> branchesExclusionPredicate = getStringPredicate(branchExclusion);
+
+        for (ChangeIssue issue : relevantIssues)
+        {
+            System.out.printf("\r%,d issues left (out of %,d) ...      ", issuesLeft--, issuesTotal);
+            boolean interestingLabel = false;
+            if (issue.getType() == IssueType.PULL_REQUEST)
+            {
+                PullRequest pullRequest = getGitHubApi().pullRequest(this.githubOwner, this.githubRepoName, issue.getNum());
+                // if the PR have a label and even in part of some exclusion we may want to include it into changelog
+                // properties file contain mime mapping
+                for (String excludeLabel : excludedLabels)
+                {
+                    if (pullRequest.getLabels().stream().anyMatch(label -> label.getName().equals(excludeLabel)))
+                    {
+                        issue.addSkipReason(Skip.EXCLUDED_LABEL);
+                    }
+                }
+                if (!pullRequest.getLabels().isEmpty() && !issue.getSkipSet().contains(Skip.EXCLUDED_LABEL))
+                {
+                    interestingLabel = true;
+                }
+            }
+
+            for (String commitSha : issue.getCommits())
+            {
+                String sha = Sha.toLowercase(commitSha);
+                ChangeCommit commit = commitMap.get(sha);
+                if ((commit != null) && (!commit.isSkipped()))
+                {
+                    Set<String> diffPaths = gitCache.getPaths(sha)
+                        .stream()
+                        .filter(Predicate.not(this::isExcludedPath))
+                        .collect(Collectors.toSet());
+                    commit.setFiles(diffPaths);
+                    if (diffPaths.isEmpty() && !interestingLabel)
+                    {
+                        commit.addSkipReason(Skip.NO_INTERESTING_PATHS_LEFT);
+                    }
+
+                    // Note: this lookup (all branches that commit exists in) is VERY time consuming.
+                    Set<String> branchesWithCommit = gitCache.getBranchesContaining(sha);
+                    commit.setBranches(branchesWithCommit);
+                    if (branchesWithCommit.stream().anyMatch(branchesExclusionPredicate))
+                    {
+                        commit.addSkipReason(Skip.EXCLUDED_BRANCH);
+                    }
+                }
+            }
+        }
+    }
+
+    public void resolveIssues() throws IOException, InterruptedException
+    {
+        LOG.debug("Discover issue references");
+
+        for (ChangeCommit changeCommit : commitMap.values())
+        {
+            collectIssueReferences(changeCommit);
+        }
+
+        LOG.debug("Resolving issue details ...");
+        boolean done = false;
+        while (!done)
+        {
+            List<ChangeIssue> unknownIssues = issueMap.values().stream()
+                .filter((issue) -> issue.getType() == IssueType.UNKNOWN)
+                .collect(Collectors.toList());
+
+            if (unknownIssues.isEmpty())
+                done = true;
+            else
+            {
+                int issuesLeft = unknownIssues.size();
+                for (ChangeIssue unknownIssue : unknownIssues)
+                {
+                    LOG.info("Need to resolve {} more issues ...", issuesLeft--);
+                    resolveUnknownIssue(unknownIssue);
+                }
+            }
+        }
+
+        LOG.debug("Tracking {} issues", issueMap.size());
     }
 
     public void save(SaveRequest saveRequest) throws IOException
@@ -261,18 +450,18 @@ public class ChangelogTool implements AutoCloseable
             System.out.printf("Found %,d Files changed in the various commits%n", changedFiles.size());
         }
 
-        switch (saveRequest.outputFormat()){
-            case MARKDOWN: writeMarkdown(saveRequest);
-            case TAG_TXT: writeVersionTagTxt(saveRequest);
-
+        switch (saveRequest.outputFormat())
+        {
+            case MARKDOWN:
+                writeMarkdown(saveRequest);
+            case TAG_TXT:
+                writeVersionTagTxt(saveRequest);
         }
-
     }
 
-    public void setVersionRange(String tagOldVersion, String refCurrentVersion)
+    public void setBranch(String branch)
     {
-        this.tagOldVersion = tagOldVersion;
-        this.refCurrentVersion = refCurrentVersion;
+        this.branch = branch;
     }
 
     public void setGithubRepo(String owner, String repoName)
@@ -281,34 +470,72 @@ public class ChangelogTool implements AutoCloseable
         this.githubRepoName = repoName;
     }
 
-    public void setBranch(String branch)
+    public void setVersionRange(String tagOldVersion, String refCurrentVersion)
     {
-        this.branch = branch;
+        this.tagOldVersion = tagOldVersion;
+        this.refCurrentVersion = refCurrentVersion;
     }
 
-    public void addLabelExclusion(String label)
+    public void writeMarkdown(SaveRequest saveRequest) throws IOException
     {
-        this.excludedLabels.add(label);
+        try (BufferedWriter writer = Files.newBufferedWriter(saveRequest.outputFile(), UTF_8);
+             PrintWriter out = new PrintWriter(writer))
+        {
+            List<Change> relevantChanges = changes.stream()
+                .filter(Predicate.not(Change::isSkip))
+                .sorted(Comparator.comparingInt(Change::getRefNumber).reversed())
+                .toList();
+
+            // Collect list of community member participation
+            Set<String> community = new HashSet<>();
+            for (Change change : relevantChanges)
+            {
+                for (Author author : change.getAuthors())
+                {
+                    if (!author.committer())
+                    {
+                        community.add(String.format("%s (%s)", author.toNiceName(), author.name()));
+                    }
+                }
+            }
+
+            if (!community.isEmpty())
+            {
+                out.println("# Special Thanks to the following Eclipse Jetty community members");
+                out.println();
+                community.forEach((author) -> out.printf("* %s%n", author));
+                out.println();
+            }
+
+            // resolve titles, ids, etc ....
+            writeSection(out, "# Changelog", relevantChanges.stream().filter((c) ->
+                !c.hasLabel("dependencies")));
+
+            if (saveRequest.includeDependencyChanges())
+            {
+                writeSection(out, "# Dependencies", relevantChanges.stream()
+                    .filter((c) -> c.hasLabel("dependencies"))
+                    .map(new ChangelogTool.DependencyBumpSimplifier())
+                    .sorted(new ChangelogTool.DependencyBumpComparator())
+                    .filter(new ChangelogTool.DistinctDependencyBumpRef())
+                );
+            }
+        }
     }
 
-    /**
-     * Exclude paths on commit with this predicate.
-     * If the resulting commit is devoid of paths as a result, it is flagged as skipped.
-     */
-    public void addCommitPathRegexExclusion(String regex)
+    public void writeVersionTagTxt(SaveRequest saveRequest) throws IOException
     {
-        Objects.requireNonNull(regex, "regex");
-        this.commitPathExclusionFilters.add((filename) -> filename.matches(regex));
-    }
+        try (BufferedWriter writer = Files.newBufferedWriter(saveRequest.outputFile(), UTF_8);
+             PrintWriter out = new PrintWriter(writer))
+        {
+            List<Change> relevantChanges = changes.stream()
+                .filter(Predicate.not(Change::isSkip))
+                .sorted(Comparator.comparingInt(Change::getRefNumber).reversed())
+                .toList();
 
-    /**
-     * Exclude paths on commit with this predicate.
-     * If the resulting commit is devoid of paths as a result, it is flagged as skipped.
-     */
-    public void addCommitPathExclusionFilter(Predicate<String> predicate)
-    {
-        Objects.requireNonNull(predicate, "predicate");
-        this.commitPathExclusionFilters.add(predicate);
+            writeSection(out, " " + saveRequest.projectVersion() + " - " + saveRequest.date(), relevantChanges.stream().filter((c) ->
+                !c.hasLabel("dependencies")));
+        }
     }
 
     /**
@@ -320,26 +547,31 @@ public class ChangelogTool implements AutoCloseable
         this.branchExclusion.add((branch) -> branch.matches(regex));
     }
 
-    /**
-     * If commit has specific branch, do not include it in the results.
-     */
-    public void addBranchExclusion(Predicate<String> predicate)
+    private void collectIssueReferences(ChangeCommit commit) throws IOException, InterruptedException
     {
-        this.branchExclusion.add(predicate);
-    }
-
-    public ChangeIssue findRelevantIssue(Set<Integer> nums)
-    {
-        for (int num : nums)
+        Set<Integer> issueNums = new HashSet<>();
+        issueNums.addAll(IssueScanner.scan(commit.getTitle()));
+        issueNums.addAll(IssueScanner.scanResolutions(commit.getBody()));
+        for (int issueNum : issueNums)
         {
-            ChangeIssue issue = this.issueMap.get(num);
+            ChangeIssue issue = issueMap.get(issueNum);
             if (issue == null)
-                continue;
-            if (issue.isSkipped())
-                continue;
-            return issue;
+            {
+                issue = new ChangeIssue(issueNum);
+                issueMap.put(issueNum, issue);
+            }
+            issue.addCommit(commit.getSha());
         }
-        return null;
+
+        PullRequests pullRequests = getGitHubApi().commitPullRequests(this.githubOwner, this.githubRepoName, commit.getSha());
+        if (!pullRequests.isEmpty())
+        {
+            commit.addPullRequestRefs(pullRequests.stream().map(Issue::getNumber).collect(Collectors.toList()));
+            pullRequests.forEach(pullRequest ->
+            {
+                issueMap.putIfAbsent(pullRequest.getNumber(), new ChangeIssue(pullRequest.getNumber()));
+            });
+        }
     }
 
     private RevCommit findCommitForCurrent() throws IOException
@@ -358,10 +590,12 @@ public class ChangelogTool implements AutoCloseable
                 refNames.add("refs/" + branch + "/HEAD");
                 refNames.add(refCurrentVersion); // for commit-ids
 
-                for (String refName : refNames) {
+                for (String refName : refNames)
+                {
                     LOG.debug("Finding commit ref for refs/tags/{}", refName);
                     Ref ref = repository.findRef(refName);
-                    if (ref != null) {
+                    if (ref != null)
+                    {
                         return walk.parseCommit(ref.getObjectId());
                     }
                 }
@@ -377,35 +611,64 @@ public class ChangelogTool implements AutoCloseable
         }
     }
 
-    public void resolveCommits() throws IOException, GitAPIException, InterruptedException {
-        RevCommit commitOld = findCommitForTag(tagOldVersion);
-        RevCommit commitNew = findCommitForCurrent();
-        LOG.debug("commit log: {} .. {}", commitOld, commitNew);
-
-        int count = 0;
-
-        LogCommand logCommand = git.log().addRange(commitOld, commitNew);
-
-        for (RevCommit commit : logCommand.call())
+    private RevCommit findCommitForTag(String tagName) throws IOException
+    {
+        try (RevWalk walk = new RevWalk(repository))
         {
-            Author author = getAuthor(authors, commit);
+            String refName = "refs/tags/" + tagName;
+            LOG.debug("Finding commit ref {}", refName);
+            Ref tagRef = repository.findRef(refName);
+            if (tagRef == null)
+            {
+                throw new ChangelogException("Ref not found: " + tagName);
+            }
+            return walk.parseCommit(tagRef.getObjectId());
+        }
+    }
 
-            ChangeCommit changeCommit = getCommit(commit.getId().getName());
+    private Author getAuthor(Authors authors, RevCommit commit)
+    {
+        Author author = authors.find(commit.getAuthorIdent().getEmailAddress());
 
-            changeCommit.setCommitTime(ZonedDateTime.ofInstant(Instant.ofEpochMilli(commit.getCommitTime()), ZoneId.systemDefault()));
-            changeCommit.setAuthor(author);
-            changeCommit.setTitle(commit.getShortMessage());
-            changeCommit.setBody(commit.getFullMessage());
-            // is this commit linked to a PullRequest?
-            PullRequests pullRequests = getGitHubApi().commitPullRequests(this.githubOwner, this.githubRepoName, changeCommit.getSha());
-            if (isMergeCommit(commit) && pullRequests.isEmpty())
-                changeCommit.addSkipReason(Skip.IS_MERGE_COMMIT);
-            if(!pullRequests.isEmpty())
-                changeCommit.addPullRequestRefs(pullRequests.stream().map(Issue::getNumber).collect(Collectors.toList()));
-            count++;
+        if (author == null)
+        {
+            author = new Author(commit.getAuthorIdent().getName())
+                .email(commit.getAuthorIdent().getEmailAddress())
+                .committer(false);
+
+            try
+            {
+                String commitId = commit.getId().getName();
+                Commit ghCommit = getGitHubApi().commit(this.githubOwner, this.githubRepoName, commitId);
+                if (ghCommit != null)
+                {
+                    ChangeCommit changeCommit = getCommit(commitId);
+                    changeCommit.setBody(ghCommit.getCommit().getMessage());
+
+                    if (ghCommit.getAuthor() != null)
+                    {
+                        String githubAuthorLogin = ghCommit.getAuthor().getLogin();
+                        author.github(githubAuthorLogin);
+                        changeCommit.setAuthor(author);
+                    }
+                    else
+                    {
+                        System.out.printf("Has no author: %s%n", commitId);
+                    }
+                }
+                else
+                {
+                    System.out.printf("Not a valid commit id: %s%n", commitId);
+                }
+            }
+            catch (InterruptedException | IOException e)
+            {
+                e.printStackTrace();
+            }
+            authors.add(author);
         }
 
-        LOG.debug("Found {} commits", count);
+        return author;
     }
 
     private ChangeCommit getCommit(String sha)
@@ -421,6 +684,16 @@ public class ChangelogTool implements AutoCloseable
         return commit;
     }
 
+    private GitHubApi getGitHubApi() throws IOException, InterruptedException
+    {
+        if (github == null)
+        {
+            github = GitHubApi.connect();
+            LOG.info("GitHub API Rate Limits: {}", github.getRateLimits());
+        }
+        return github;
+    }
+
     private Predicate<String> getStringPredicate(Collection<Predicate<String>> filters)
     {
         Predicate<String> predicate = str -> true;
@@ -431,61 +704,19 @@ public class ChangelogTool implements AutoCloseable
         return predicate;
     }
 
-    private void collectIssueReferences(ChangeCommit commit) throws IOException, InterruptedException {
-        Set<Integer> issueNums = new HashSet<>();
-        issueNums.addAll(IssueScanner.scan(commit.getTitle()));
-        issueNums.addAll(IssueScanner.scanResolutions(commit.getBody()));
-        for (int issueNum : issueNums)
+    private boolean isExcludedPath(String path)
+    {
+        for (Predicate<String> exclusion : commitPathExclusionFilters)
         {
-            ChangeIssue issue = issueMap.get(issueNum);
-            if (issue == null)
-            {
-                issue = new ChangeIssue(issueNum);
-                issueMap.put(issueNum, issue);
-            }
-            issue.addCommit(commit.getSha());
+            if (exclusion.test(path))
+                return true;
         }
-
-        PullRequests pullRequests = getGitHubApi().commitPullRequests(this.githubOwner, this.githubRepoName, commit.getSha());
-        if(!pullRequests.isEmpty())
-        {
-            commit.addPullRequestRefs(pullRequests.stream().map(Issue::getNumber).collect(Collectors.toList()));
-            pullRequests.forEach(pullRequest -> {
-                issueMap.putIfAbsent(pullRequest.getNumber(), new ChangeIssue(pullRequest.getNumber()));
-            });
-        }
+        return false;
     }
 
-    public void resolveIssues() throws IOException, InterruptedException {
-        LOG.debug("Discover issue references");
-
-        for (ChangeCommit changeCommit : commitMap.values())
-        {
-            collectIssueReferences(changeCommit);
-        }
-
-        LOG.debug("Resolving issue details ...");
-        boolean done = false;
-        while (!done)
-        {
-            List<ChangeIssue> unknownIssues = issueMap.values().stream()
-                .filter((issue) -> issue.getType() == IssueType.UNKNOWN)
-                .collect(Collectors.toList());
-
-            if (unknownIssues.isEmpty())
-                done = true;
-            else
-            {
-                int issuesLeft = unknownIssues.size();
-                for (ChangeIssue unknownIssue : unknownIssues)
-                {
-                    LOG.info("Need to resolve {} more issues ...", issuesLeft--);
-                    resolveUnknownIssue(unknownIssue);
-                }
-            }
-        }
-
-        LOG.debug("Tracking {} issues", issueMap.size());
+    private boolean isMergeCommit(RevCommit commit)
+    {
+        return ((commit.getParents() != null) && (commit.getParents().length >= 2));
     }
 
     private void resolveUnknownIssue(ChangeIssue issue)
@@ -575,140 +806,6 @@ public class ChangelogTool implements AutoCloseable
         }
     }
 
-    public void resolveIssueCommits() throws IOException, InterruptedException {
-        List<ChangeIssue> relevantIssues = getRelevantKnownIssues();
-
-        int issuesTotal = relevantIssues.size();
-        int issuesLeft = issuesTotal;
-        System.out.printf("Resolving commit branches and paths on %,d issues ...%n", issuesLeft);
-
-        Predicate<String> branchesExclusionPredicate = getStringPredicate(branchExclusion);
-
-        for (ChangeIssue issue : relevantIssues)
-        {
-            System.out.printf("\r%,d issues left (out of %,d) ...      ", issuesLeft--, issuesTotal);
-            boolean interestingLabel = false;
-            if(issue.getType() == IssueType.PULL_REQUEST )
-            {
-                PullRequest pullRequest = getGitHubApi().pullRequest(this.githubOwner, this.githubRepoName, issue.getNum());
-                // if the PR have a label and even in part of some exclusion we may want to include it into changelog
-                // properties file contain mime mapping
-                for (String excludeLabel : excludedLabels)
-                {
-                    if (pullRequest.getLabels().stream().anyMatch(label -> label.getName().equals(excludeLabel)))
-                    {
-                        issue.addSkipReason(Skip.EXCLUDED_LABEL);
-                    }
-                }
-                if(!pullRequest.getLabels().isEmpty() && !issue.getSkipSet().contains(Skip.EXCLUDED_LABEL))
-                {
-                    interestingLabel = true;
-                }
-            }
-
-            for (String commitSha : issue.getCommits())
-            {
-                String sha = Sha.toLowercase(commitSha);
-                ChangeCommit commit = commitMap.get(sha);
-                if ((commit != null) && (!commit.isSkipped()))
-                {
-                    Set<String> diffPaths = gitCache.getPaths(sha)
-                        .stream()
-                        .filter(Predicate.not(this::isExcludedPath))
-                        .collect(Collectors.toSet());
-                    commit.setFiles(diffPaths);
-                    if (diffPaths.isEmpty() && !interestingLabel)
-                    {
-                        commit.addSkipReason(Skip.NO_INTERESTING_PATHS_LEFT);
-                    }
-
-                    // Note: this lookup (all branches that commit exists in) is VERY time consuming.
-                    Set<String> branchesWithCommit = gitCache.getBranchesContaining(sha);
-                    commit.setBranches(branchesWithCommit);
-                    if (branchesWithCommit.stream().anyMatch(branchesExclusionPredicate))
-                    {
-                        commit.addSkipReason(Skip.EXCLUDED_BRANCH);
-                    }
-                }
-            }
-        }
-    }
-
-    public void linkActivity()
-    {
-        LOG.debug("Connecting up {} issues to {} commits", issueMap.size(), commitMap.size());
-
-        int connectedIssues = 0;
-        int connectedPullRequests = 0;
-        Set<String> uniqueCommits = new HashSet<>();
-
-        // Back reference the issues into the commits
-        for (ChangeIssue issue : issueMap.values())
-        {
-            // Does issue have relevance?
-            boolean hasRelevance = false;
-            for (String commitSha : issue.getCommits())
-            {
-                // Only pull in commits found via log, don't create new ones.
-                // This is done to avoid referencing commits outside of the log range.
-                String sha = commitSha.toLowerCase(Locale.US);
-                ChangeCommit changeCommit = commitMap.get(sha);
-                if (changeCommit != null)
-                {
-                    if (issue.getType() == IssueType.ISSUE)
-                    {
-                        connectedIssues++;
-                        uniqueCommits.add(sha);
-                        changeCommit.addIssueRef(issue.getNum());
-                    }
-                    else if (issue.getType() == IssueType.PULL_REQUEST)
-                    {
-                        connectedPullRequests++;
-                        uniqueCommits.add(sha);
-                        changeCommit.addPullRequestRef(issue.getNum());
-                    }
-
-                    if (!changeCommit.isSkipped())
-                    {
-                        hasRelevance = true;
-                    }
-                }
-            }
-            if (!hasRelevance)
-            {
-                issue.addSkipReason(Skip.NO_RELEVANT_COMMITS);
-            }
-
-            // special handling for pull requests
-            if (issue.getType() == IssueType.PULL_REQUEST)
-            {
-                if (!this.branch.equals(issue.getBaseRef()))
-                {
-                    issue.addSkipReason(Skip.NOT_CORRECT_BASE_REF);
-                }
-            }
-        }
-
-        LOG.debug("Connected {} commits to {} issues and {} pull requests", uniqueCommits.size(), connectedIssues, connectedPullRequests);
-
-        // Create Change list
-        int changeId = 0;
-        for (ChangeIssue issue : getRelevantKnownIssues())
-        {
-            if (issue.isSkipped() || issue.hasChangeRef())
-                continue;
-
-            Change change = new Change(changeId++);
-            // add commits
-            issue.getCommits().forEach((commitSha) -> updateChangeCommit(change, commitSha));
-            // add issues & pull requests
-            issue.getReferencedIssues().forEach((issueNum) -> updateChangeIssues(change, issueNum));
-            this.changes.add(change);
-        }
-
-        this.changes.forEach((change) -> change.normalize(IssueType.ISSUE));
-    }
-
     private void updateChangeCommit(Change change, String commitSha)
     {
         String sha = Sha.toLowercase(commitSha);
@@ -757,89 +854,6 @@ public class ChangelogTool implements AutoCloseable
         }
     }
 
-    public List<ChangeIssue> getRelevantPullRequests()
-    {
-        return issueMap.values().stream()
-            .filter((issue) -> !issue.isSkipped())
-            .filter((issue) -> issue.getType() == IssueType.PULL_REQUEST)
-            .filter((issue) -> branch.equals(issue.getBaseRef()))
-            .sorted(Comparator.comparing(ChangeIssue::getNum).reversed())
-            .collect(Collectors.toList());
-    }
-
-    public List<ChangeIssue> getRelevantKnownIssues()
-    {
-        return issueMap.values().stream()
-            .filter((issue) -> !issue.isSkipped())
-            .filter((issue) -> issue.getType() != IssueType.UNKNOWN)
-            .filter((issue) -> branch.equals(issue.getBaseRef()))
-            .sorted(Comparator.comparing(ChangeIssue::getNum).reversed())
-            .collect(Collectors.toList());
-    }
-
-    public void writeVersionTagTxt(SaveRequest saveRequest) throws IOException
-    {
-        try (BufferedWriter writer = Files.newBufferedWriter(saveRequest.outputFile(), UTF_8);
-             PrintWriter out = new PrintWriter(writer))
-        {
-            List<Change> relevantChanges = changes.stream()
-                    .filter(Predicate.not(Change::isSkip))
-                    .sorted(Comparator.comparingInt(Change::getRefNumber).reversed())
-                    .toList();
-
-            writeSection(out, " " + saveRequest.projectVersion() + " - " + saveRequest.date(), relevantChanges.stream().filter((c) ->
-                    !c.hasLabel("dependencies")));
-
-        }
-    }
-
-    public void writeMarkdown(SaveRequest saveRequest) throws IOException
-    {
-        try (BufferedWriter writer = Files.newBufferedWriter(saveRequest.outputFile(), UTF_8);
-             PrintWriter out = new PrintWriter(writer))
-        {
-            List<Change> relevantChanges = changes.stream()
-                .filter(Predicate.not(Change::isSkip))
-                .sorted(Comparator.comparingInt(Change::getRefNumber).reversed())
-                .toList();
-
-            // Collect list of community member participation
-            Set<String> community = new HashSet<>();
-            for (Change change : relevantChanges)
-            {
-                for (Author author : change.getAuthors())
-                {
-                    if (!author.committer())
-                    {
-                        community.add(String.format("%s (%s)", author.toNiceName(), author.name()));
-                    }
-                }
-            }
-
-            if (!community.isEmpty())
-            {
-                out.println("# Special Thanks to the following Eclipse Jetty community members");
-                out.println();
-                community.forEach((author) -> out.printf("* %s%n", author));
-                out.println();
-            }
-
-            // resolve titles, ids, etc ....
-            writeSection(out, "# Changelog", relevantChanges.stream().filter((c) ->
-                !c.hasLabel("dependencies")));
-
-            if (saveRequest.includeDependencyChanges())
-            {
-                writeSection(out, "# Dependencies", relevantChanges.stream()
-                    .filter((c) -> c.hasLabel("dependencies"))
-                    .map(new ChangelogTool.DependencyBumpSimplifier())
-                    .sorted(new ChangelogTool.DependencyBumpComparator())
-                    .filter(new ChangelogTool.DistinctDependencyBumpRef())
-                );
-            }
-        }
-    }
-
     private void writeSection(PrintWriter out, String sectionName, Stream<Change> changesStream)
     {
         List<Change> changes = changesStream.toList();
@@ -863,88 +877,81 @@ public class ChangelogTool implements AutoCloseable
         }
     }
 
-    private boolean isMergeCommit(RevCommit commit)
+    public static class DistinctRefTitle implements Predicate<Change>
     {
-        return ((commit.getParents() != null) && (commit.getParents().length >= 2));
-    }
+        private Map<String, Boolean> seen = new ConcurrentHashMap<>();
 
-    private boolean isExcludedPath(String path)
-    {
-        for (Predicate<String> exclusion : commitPathExclusionFilters)
+        @Override
+        public boolean test(Change change)
         {
-            if (exclusion.test(path))
-                return true;
+            String title = change.getRefTitle();
+            return seen.putIfAbsent(title, Boolean.TRUE) == null;
         }
-        return false;
     }
 
-    private GitHubApi getGitHubApi() throws IOException, InterruptedException
+    public static class DistinctDependencyBumpRef implements Predicate<Change>
     {
-        if (github == null)
+        private Map<String, Boolean> bumps = new ConcurrentHashMap<>();
+        private Pattern patternBump = Pattern.compile("^Bump (.*) to (.*)$");
+
+        @Override
+        public boolean test(Change change)
         {
-            github = GitHubApi.connect();
-            LOG.info("GitHub API Rate Limits: {}", github.getRateLimits());
-        }
-        return github;
-    }
-
-    private Author getAuthor(Authors authors, RevCommit commit)
-    {
-        Author author = authors.find(commit.getAuthorIdent().getEmailAddress());
-
-        if (author == null)
-        {
-            author = new Author(commit.getAuthorIdent().getName())
-                .email(commit.getAuthorIdent().getEmailAddress())
-                .committer(false);
-
-            try
+            String title = change.getRefTitle();
+            Matcher matcher = patternBump.matcher(title);
+            if (matcher.find())
             {
-                String commitId = commit.getId().getName();
-                Commit ghCommit = getGitHubApi().commit(this.githubOwner, this.githubRepoName, commitId);
-                if (ghCommit != null)
-                {
-                    ChangeCommit changeCommit = getCommit(commitId);
-                    changeCommit.setBody(ghCommit.getCommit().getMessage());
+                String depName = matcher.group(1);
+                return bumps.putIfAbsent(depName, Boolean.TRUE) == null;
+            }
 
-                    if (ghCommit.getAuthor() != null)
-                    {
-                        String githubAuthorLogin = ghCommit.getAuthor().getLogin();
-                        author.github(githubAuthorLogin);
-                        changeCommit.setAuthor(author);
-                    }
-                    else
-                    {
-                        System.out.printf("Has no author: %s%n", commitId);
-                    }
-                }
-                else
+            // allow non-matching through.
+            return true;
+        }
+    }
+
+    public static class DependencyBumpComparator implements Comparator<Change>
+    {
+        private Pattern patternBump = Pattern.compile("^Bump (.*) to (.*)$");
+
+        @Override
+        public int compare(Change c1, Change c2)
+        {
+            Matcher matcher1 = patternBump.matcher(c1.getRefTitle());
+            Matcher matcher2 = patternBump.matcher(c2.getRefTitle());
+
+            if (matcher1.find())
+            {
+                if (matcher2.find())
                 {
-                    System.out.printf("Not a valid commit id: %s%n", commitId);
+                    int diff = matcher1.group(1).compareTo(matcher2.group(1));
+                    if (diff != 0)
+                        return diff;
+                    return matcher2.group(2).compareTo(matcher1.group(2));
                 }
             }
-            catch (InterruptedException | IOException e)
-            {
-                e.printStackTrace();
-            }
-            authors.add(author);
-        }
 
-        return author;
+            return c1.getRefTitle().compareTo(c2.getRefTitle());
+        }
     }
 
-    private RevCommit findCommitForTag(String tagName) throws IOException
+    public static class DependencyBumpSimplifier implements Function<Change, Change>
     {
-        try (RevWalk walk = new RevWalk(repository))
+        private Pattern patternBump = Pattern.compile("^Bump (.*) from (.*) to (.*)$");
+
+        @Override
+        public Change apply(Change change)
         {
-            String refName = "refs/tags/" + tagName;
-            LOG.debug("Finding commit ref {}", refName);
-            Ref tagRef = repository.findRef(refName);
-            if (tagRef == null)
+            Matcher matcher = patternBump.matcher(change.getRefTitle());
+            if (matcher.find())
             {
-                throw new ChangelogException("Ref not found: " + tagName);
+                String depName = matcher.group(1);
+                String latestVersion = matcher.group(3);
+                String replacementTitle = String.format("Bump %s to %s", depName, latestVersion);
+                change.setRefTitle(replacementTitle);
             }
-            return walk.parseCommit(tagRef.getObjectId());
+            // return same change.
+            return change;
         }
     }
 }

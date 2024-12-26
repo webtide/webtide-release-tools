@@ -32,54 +32,9 @@ public class Issue
     protected String authorAssociation;
     protected PullRequestRef pullRequest;
 
-    public int getNumber()
-    {
-        return number;
-    }
-
-    public String getTitle()
-    {
-        return title;
-    }
-
-    public String getState()
-    {
-        return state;
-    }
-
-    public User getUser()
-    {
-        return user;
-    }
-
-    public List<Label> getLabels()
-    {
-        return labels;
-    }
-
     public List<User> getAssignees()
     {
         return assignees;
-    }
-
-    public String getBody()
-    {
-        return body;
-    }
-
-    public ZonedDateTime getCreatedAt()
-    {
-        return createdAt;
-    }
-
-    public ZonedDateTime getUpdatedAt()
-    {
-        return updatedAt;
-    }
-
-    public ZonedDateTime getClosedAt()
-    {
-        return closedAt;
     }
 
     public String getAuthorAssociation()
@@ -87,14 +42,59 @@ public class Issue
         return authorAssociation;
     }
 
+    public String getBody()
+    {
+        return body;
+    }
+
+    public ZonedDateTime getClosedAt()
+    {
+        return closedAt;
+    }
+
     public User getClosedBy()
     {
         return closedBy;
     }
 
+    public ZonedDateTime getCreatedAt()
+    {
+        return createdAt;
+    }
+
+    public List<Label> getLabels()
+    {
+        return labels;
+    }
+
+    public int getNumber()
+    {
+        return number;
+    }
+
     public PullRequestRef getPullRequest()
     {
         return pullRequest;
+    }
+
+    public String getState()
+    {
+        return state;
+    }
+
+    public String getTitle()
+    {
+        return title;
+    }
+
+    public ZonedDateTime getUpdatedAt()
+    {
+        return updatedAt;
+    }
+
+    public User getUser()
+    {
+        return user;
     }
 
     @Override

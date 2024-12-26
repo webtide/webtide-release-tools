@@ -25,24 +25,14 @@ public class Project
     protected ZonedDateTime updatedAt;
     protected User creator;
 
-    public int getNumber()
-    {
-        return number;
-    }
-
-    public String getName()
-    {
-        return name;
-    }
-
     public String getBody()
     {
         return body;
     }
 
-    public String getState()
+    public void setBody(String body)
     {
-        return state;
+        this.body = body;
     }
 
     public ZonedDateTime getCreatedAt()
@@ -50,14 +40,19 @@ public class Project
         return createdAt;
     }
 
-    public ZonedDateTime getUpdatedAt()
+    public void setCreatedAt(ZonedDateTime createdAt)
     {
-        return updatedAt;
+        this.createdAt = createdAt;
     }
 
     public User getCreator()
     {
         return creator;
+    }
+
+    public void setCreator(User creator)
+    {
+        this.creator = creator;
     }
 
     public long getId()
@@ -70,9 +65,9 @@ public class Project
         this.id = id;
     }
 
-    public void setNumber(int number)
+    public String getName()
     {
-        this.number = number;
+        return name;
     }
 
     public void setName(String name)
@@ -80,9 +75,19 @@ public class Project
         this.name = name;
     }
 
-    public void setBody(String body)
+    public int getNumber()
     {
-        this.body = body;
+        return number;
+    }
+
+    public void setNumber(int number)
+    {
+        this.number = number;
+    }
+
+    public String getState()
+    {
+        return state;
     }
 
     public void setState(String state)
@@ -90,19 +95,13 @@ public class Project
         this.state = state;
     }
 
-    public void setCreatedAt(ZonedDateTime createdAt)
+    public ZonedDateTime getUpdatedAt()
     {
-        this.createdAt = createdAt;
+        return updatedAt;
     }
 
     public void setUpdatedAt(ZonedDateTime updatedAt)
     {
         this.updatedAt = updatedAt;
     }
-
-    public void setCreator(User creator)
-    {
-        this.creator = creator;
-    }
-
 }

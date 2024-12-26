@@ -126,10 +126,11 @@ public class ChangeIssue extends ChangeRef
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return "ChangeIssue{" +
-                "num=" + num +
-                ", title='" + title + '\'' +
-                '}';
+            "num=" + num +
+            ", title='" + title + '\'' +
+            '}';
     }
 }

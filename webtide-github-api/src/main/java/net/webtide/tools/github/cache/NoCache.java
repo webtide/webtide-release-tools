@@ -32,14 +32,14 @@ public class NoCache implements Cache
     }
 
     @Override
-    public void saveNotFound(String path)
-    {
-        notFoundSet.add(path);
-    }
-
-    @Override
     public void save(String path, String body)
     {
         // do nothing
+    }
+
+    @Override
+    public void saveNotFound(String path)
+    {
+        notFoundSet.add(path);
     }
 }

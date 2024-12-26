@@ -12,20 +12,20 @@
 
 package net.webtide.tools.release.plugins;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
-
 @Mojo(name = "update-version-text", defaultPhase = LifecyclePhase.PACKAGE, threadSafe = true)
-public class UpdateVersionTextMojo extends TagMojo {
+public class UpdateVersionTextMojo extends TagMojo
+{
 
     /**
      * The original VERSION.txt file.
@@ -40,16 +40,19 @@ public class UpdateVersionTextMojo extends TagMojo {
     protected File versionTextOutputFile;
 
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    public void execute() throws MojoExecutionException, MojoFailureException
+    {
         // TODO add a flag to reuse already generated files
         super.execute();
-        try {
+        try
+        {
             Files.deleteIfExists(versionTextOutputFile.toPath());
             Files.write(versionTextOutputFile.toPath(), Files.readAllBytes(versionTagOutputFile.toPath()), StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
             Files.write(versionTextOutputFile.toPath(), Files.readAllBytes(originalVersionTextOutputFile.toPath()), StandardOpenOption.APPEND);
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             throw new MojoExecutionException(e);
         }
-
     }
 }

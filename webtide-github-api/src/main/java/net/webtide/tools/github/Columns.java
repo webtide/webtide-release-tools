@@ -21,5 +21,4 @@ public class Columns extends ArrayList<Column>
     {
         return super.add(column);
     }
-
 }

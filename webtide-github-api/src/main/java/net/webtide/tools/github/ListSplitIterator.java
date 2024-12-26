@@ -27,16 +27,22 @@ public class ListSplitIterator<T> implements Spliterator<T>
     private int activePage = 1;
     private DataSupplier<T> supplier;
 
-    public ListSplitIterator (GitHubApi gitHubApi, DataSupplier<T> supplier)
+    public ListSplitIterator(GitHubApi gitHubApi, DataSupplier<T> supplier)
     {
         this.github = gitHubApi;
         this.supplier = supplier;
     }
 
-    @FunctionalInterface
-    public interface DataSupplier<T>
+    @Override
+    public int characteristics()
     {
-        List<T> get(int activePage) throws IOException, InterruptedException;
+        return ORDERED;
+    }
+
+    @Override
+    public long estimateSize()
+    {
+        return Long.MAX_VALUE;
     }
 
     @Override
@@ -52,6 +58,12 @@ public class ListSplitIterator<T> implements Spliterator<T>
         }
     }
 
+    @Override
+    public Spliterator<T> trySplit()
+    {
+        return null;
+    }
+
     private T getNextData()
     {
         if (activeOffset >= activeData.size())
@@ -61,7 +73,7 @@ public class ListSplitIterator<T> implements Spliterator<T>
                 activeData.clear();
                 while (activeData.isEmpty())
                 {
-                    List<T> datas =  supplier.get(activePage++);
+                    List<T> datas = supplier.get(activePage++);
                     if ((datas == null) || datas.isEmpty())
                         return null;
                     activeData.addAll(datas);
@@ -86,22 +98,9 @@ public class ListSplitIterator<T> implements Spliterator<T>
         return activeData.get(activeOffset++);
     }
 
-    @Override
-    public Spliterator<T> trySplit()
+    @FunctionalInterface
+    public interface DataSupplier<T>
     {
-        return null;
+        List<T> get(int activePage) throws IOException, InterruptedException;
     }
-
-    @Override
-    public long estimateSize()
-    {
-        return Long.MAX_VALUE;
-    }
-
-    @Override
-    public int characteristics()
-    {
-        return ORDERED;
-    }
-
 }

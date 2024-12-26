@@ -81,155 +81,6 @@ public class GitCache implements AutoCloseable
         this.commits = loadCommitsCache();
     }
 
-    private Commits loadCommitsCache()
-    {
-        if (Files.exists(commitsCache))
-        {
-            try (BufferedReader reader = Files.newBufferedReader(commitsCache, UTF_8);
-                 JsonReader jsonReader = gson.newJsonReader(reader))
-            {
-                return gson.fromJson(jsonReader, Commits.class);
-            }
-            catch (IOException e)
-            {
-                LOG.warn("Unable to load: {}", commitsCache, e);
-            }
-        }
-        return new Commits();
-    }
-
-    private void save()
-    {
-        try (BufferedWriter writer = Files.newBufferedWriter(commitsCache, UTF_8);
-             JsonWriter jsonWriter = gson.newJsonWriter(writer))
-        {
-            gson.toJson(commits, Commits.class, jsonWriter);
-        }
-        catch (IOException e)
-        {
-            LOG.warn("Unable to save: {}", commitsCache, e);
-        }
-    }
-
-    @Override
-    public void close()
-    {
-        this.revWalker.close();
-    }
-
-    private Commit getCommit(String commitId)
-    {
-        String sha = Sha.toLowercase(commitId);
-        Commit commit = commits.getCommit(sha);
-        if (commit == null)
-        {
-            commit = new Commit();
-            commit.setSha(sha);
-            commits.putCommit(commit);
-        }
-        return commit;
-    }
-
-    public Set<String> getPaths(String sha)
-    {
-        String commitId = Sha.toLowercase(sha);
-        Commit commit = getCommit(commitId);
-        Set<String> paths = commit.getDiffPaths();
-        if (paths == null)
-        {
-            // look up from git
-            paths = getGitCommitPaths(ObjectId.fromString(commitId));
-            commit.setDiffPaths(paths);
-            commits.putCommit(commit);
-            save();
-        }
-        return paths;
-    }
-
-    private Set<String> getGitCommitPaths(ObjectId commitId)
-    {
-        try
-        {
-            RevCommit revCommit = revWalker.parseCommit(commitId);
-            return collectPathsInCommit(revCommit);
-        }
-        catch (IOException | GitAPIException e)
-        {
-            throw new ChangelogException("Unable to get diff paths for commit: " + commitId, e);
-        }
-    }
-
-    private Set<String> collectPathsInCommit(RevCommit commit) throws IOException, GitAPIException
-    {
-        final String sha = commit.getId().getName();
-        final List<DiffEntry> diffs = git.diff()
-            .setOldTree(prepareTreeParser(sha + "^"))
-            .setNewTree(prepareTreeParser(sha))
-            .call();
-
-        final Set<String> paths = new HashSet<>();
-
-        for (DiffEntry diff : diffs)
-        {
-            paths.add(diff.getOldPath());
-            paths.add(diff.getNewPath());
-        }
-
-        return paths;
-    }
-
-    private AbstractTreeIterator prepareTreeParser(String objectId) throws IOException
-    {
-        try (RevWalk walk = new RevWalk(repository))
-        {
-            RevCommit commit = walk.parseCommit(repository.resolve(objectId));
-            RevTree tree = walk.parseTree(commit.getTree().getId());
-
-            CanonicalTreeParser treeParser = new CanonicalTreeParser();
-            try (ObjectReader reader = repository.newObjectReader())
-            {
-                treeParser.reset(reader, tree.getId());
-            }
-
-            walk.dispose();
-            return treeParser;
-        }
-    }
-
-    public Set<String> getBranchesContaining(String sha)
-    {
-        String commitId = Sha.toLowercase(sha);
-        Commit commit = getCommit(commitId);
-        Set<String> branches = commit.getBranches();
-        if (branches == null)
-        {
-            // look up from git
-            branches = getGitBranchesContaining(commitId);
-            commit.setBranches(branches);
-            commits.putCommit(commit);
-            save();
-        }
-        return branches;
-    }
-
-    private Set<String> getGitBranchesContaining(String sha)
-    {
-        try
-        {
-            return git.branchList()
-                .setListMode(ListBranchCommand.ListMode.ALL)
-                .setContains(sha)
-                .call()
-                .stream()
-                .map(Ref::getName)
-                .collect(Collectors.toSet());
-        }
-        catch (GitAPIException e)
-        {
-            throw new ChangelogException("Unable to query git for branches containing: " + sha, e);
-        }
-    }
-
     private static Path resolveCacheFile(Repository repository)
     {
         Path gitPath = repository.getDirectory().toPath();
@@ -255,6 +106,155 @@ public class GitCache implements AutoCloseable
         return configRoot.resolve("commits.json");
     }
 
+    @Override
+    public void close()
+    {
+        this.revWalker.close();
+    }
+
+    public Set<String> getBranchesContaining(String sha)
+    {
+        String commitId = Sha.toLowercase(sha);
+        Commit commit = getCommit(commitId);
+        Set<String> branches = commit.getBranches();
+        if (branches == null)
+        {
+            // look up from git
+            branches = getGitBranchesContaining(commitId);
+            commit.setBranches(branches);
+            commits.putCommit(commit);
+            save();
+        }
+        return branches;
+    }
+
+    public Set<String> getPaths(String sha)
+    {
+        String commitId = Sha.toLowercase(sha);
+        Commit commit = getCommit(commitId);
+        Set<String> paths = commit.getDiffPaths();
+        if (paths == null)
+        {
+            // look up from git
+            paths = getGitCommitPaths(ObjectId.fromString(commitId));
+            commit.setDiffPaths(paths);
+            commits.putCommit(commit);
+            save();
+        }
+        return paths;
+    }
+
+    private Set<String> collectPathsInCommit(RevCommit commit) throws IOException, GitAPIException
+    {
+        final String sha = commit.getId().getName();
+        final List<DiffEntry> diffs = git.diff()
+            .setOldTree(prepareTreeParser(sha + "^"))
+            .setNewTree(prepareTreeParser(sha))
+            .call();
+
+        final Set<String> paths = new HashSet<>();
+
+        for (DiffEntry diff : diffs)
+        {
+            paths.add(diff.getOldPath());
+            paths.add(diff.getNewPath());
+        }
+
+        return paths;
+    }
+
+    private Commit getCommit(String commitId)
+    {
+        String sha = Sha.toLowercase(commitId);
+        Commit commit = commits.getCommit(sha);
+        if (commit == null)
+        {
+            commit = new Commit();
+            commit.setSha(sha);
+            commits.putCommit(commit);
+        }
+        return commit;
+    }
+
+    private Set<String> getGitBranchesContaining(String sha)
+    {
+        try
+        {
+            return git.branchList()
+                .setListMode(ListBranchCommand.ListMode.ALL)
+                .setContains(sha)
+                .call()
+                .stream()
+                .map(Ref::getName)
+                .collect(Collectors.toSet());
+        }
+        catch (GitAPIException e)
+        {
+            throw new ChangelogException("Unable to query git for branches containing: " + sha, e);
+        }
+    }
+
+    private Set<String> getGitCommitPaths(ObjectId commitId)
+    {
+        try
+        {
+            RevCommit revCommit = revWalker.parseCommit(commitId);
+            return collectPathsInCommit(revCommit);
+        }
+        catch (IOException | GitAPIException e)
+        {
+            throw new ChangelogException("Unable to get diff paths for commit: " + commitId, e);
+        }
+    }
+
+    private Commits loadCommitsCache()
+    {
+        if (Files.exists(commitsCache))
+        {
+            try (BufferedReader reader = Files.newBufferedReader(commitsCache, UTF_8);
+                 JsonReader jsonReader = gson.newJsonReader(reader))
+            {
+                return gson.fromJson(jsonReader, Commits.class);
+            }
+            catch (IOException e)
+            {
+                LOG.warn("Unable to load: {}", commitsCache, e);
+            }
+        }
+        return new Commits();
+    }
+
+    private AbstractTreeIterator prepareTreeParser(String objectId) throws IOException
+    {
+        try (RevWalk walk = new RevWalk(repository))
+        {
+            RevCommit commit = walk.parseCommit(repository.resolve(objectId));
+            RevTree tree = walk.parseTree(commit.getTree().getId());
+
+            CanonicalTreeParser treeParser = new CanonicalTreeParser();
+            try (ObjectReader reader = repository.newObjectReader())
+            {
+                treeParser.reset(reader, tree.getId());
+            }
+
+            walk.dispose();
+            return treeParser;
+        }
+    }
+
+    private void save()
+    {
+        try (BufferedWriter writer = Files.newBufferedWriter(commitsCache, UTF_8);
+             JsonWriter jsonWriter = gson.newJsonWriter(writer))
+        {
+            gson.toJson(commits, Commits.class, jsonWriter);
+        }
+        catch (IOException e)
+        {
+            LOG.warn("Unable to save: {}", commitsCache, e);
+        }
+    }
+
     public static class Commits
     {
         @SerializedName("commits")
@@ -277,16 +277,6 @@ public class GitCache implements AutoCloseable
         private Set<String> branches;
         private Set<String> diffPaths;
 
-        public String getSha()
-        {
-            return sha;
-        }
-
-        public void setSha(String sha)
-        {
-            this.sha = Sha.toLowercase(sha);
-        }
-
         public Set<String> getBranches()
         {
             return branches;
@@ -305,6 +295,16 @@ public class GitCache implements AutoCloseable
         public void setDiffPaths(Set<String> diffPaths)
         {
             this.diffPaths = diffPaths;
+        }
+
+        public String getSha()
+        {
+            return sha;
+        }
+
+        public void setSha(String sha)
+        {
+            this.sha = Sha.toLowercase(sha);
         }
     }
 }

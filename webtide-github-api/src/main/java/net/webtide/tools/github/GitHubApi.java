@@ -62,11 +62,10 @@ public class GitHubApi
     private final HttpClient client;
     private final HttpRequest.Builder baseRequest;
     private final Gson gson;
-    private Cache cache;
     private final GitHubProjectsApi gitHubProjectsApi;
     private final GitHubColumnsApi gitHubColumnsApi;
     private final GitHubCardsApi gitHubCardsApi;
-
+    private Cache cache;
     private RateLeft rateLeft;
 
     private GitHubApi(String oauthToken)
@@ -136,6 +135,65 @@ public class GitHubApi
         return new GitHubApi(null);
     }
 
+    protected static List<CrossReference> loadCrossReferences(String body)
+    {
+        Gson gson = new GsonBuilder()
+            .registerTypeHierarchyAdapter(ZonedDateTime.class, new ISO8601TypeAdapter())
+            .setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
+            .create();
+
+        JsonObject jsonObj = gson.fromJson(body, JsonObject.class);
+        JsonObject data = jsonObj.getAsJsonObject("data");
+        JsonObject repository = data.getAsJsonObject("repository");
+        JsonObject issue = repository.getAsJsonObject("issue");
+        JsonObject timelineItems = issue.getAsJsonObject("timelineItems");
+        JsonArray timelineArray = timelineItems.getAsJsonArray("nodes");
+
+        List<CrossReference> crossReferences = new ArrayList<>();
+        for (JsonElement nodeElem : timelineArray)
+        {
+            JsonObject entry = nodeElem.getAsJsonObject();
+            JsonElement source = entry.get("source");
+            CrossReference crossReference = gson.fromJson(source.toString(), CrossReference.class);
+            if (crossReference.getUrl() == null)
+                continue; // skip
+            crossReferences.add(crossReference);
+        }
+
+        return crossReferences;
+    }
+
+    public static String loadQuery(String templatePath, Map<String, String> optionMap) throws IOException
+    {
+        URL url = GitHubApi.class.getResource(templatePath);
+        if (url == null)
+            throw new FileNotFoundException("Unable to find template resource: " + templatePath);
+
+        try (InputStream in = url.openStream();
+             InputStreamReader reader = new InputStreamReader(in, UTF_8))
+        {
+            String templateStr = CharStreams.toString(reader);
+            StringBuilder output = new StringBuilder();
+            Pattern replacementPattern = Pattern.compile("@([^@]+)@");
+            Matcher matcher = replacementPattern.matcher(templateStr);
+            int offset = 0;
+            while (matcher.find(offset))
+            {
+                String key = matcher.group(1);
+                output.append(templateStr, offset, matcher.start(0));
+                String result = optionMap.get(key);
+                if (result != null)
+                    output.append(result);
+                else
+                    output.append('@').append(key).append('@'); // failed match
+                offset = matcher.end(0);
+            }
+            output.append(templateStr.substring(offset));
+
+            return output.toString();
+        }
+    }
+
     /**
      * Create a Gson suitable for parsing Github JSON responses
      *
@@ -149,11 +207,6 @@ public class GitHubApi
             .create();
     }
 
-    protected Gson getGson()
-    {
-        return this.gson;
-    }
-
     public Commit commit(String repoOwner, String repoName, String commitId) throws IOException, InterruptedException
     {
         String path = String.format("/repos/%s/%s/commits/%s", repoOwner, repoName, commitId);
@@ -162,6 +215,16 @@ public class GitHubApi
                 .header("Accept", "application/vnd.github.v3+json")
                 .build());
         return gson.fromJson(body, Commit.class);
+    }
+
+    public PullRequests commitPullRequests(String repoOwner, String repoName, String commit) throws IOException, InterruptedException
+    {
+        String path = String.format("/repos/%s/%s/commits/%s/pulls", repoOwner, repoName, commit);
+        String body = getCachedBody(path, (requestBuilder) ->
+            requestBuilder.GET()
+                .header("Accept", "application/vnd.github.v3+json")
+                .build());
+        return gson.fromJson(body, PullRequests.class);
     }
 
     public Cache getCache()
@@ -174,61 +237,26 @@ public class GitHubApi
         this.cache = cache;
     }
 
-    public <T> T query(String path, Class<T> t, Function<HttpRequest.Builder, HttpRequest> requestBuilder) throws IOException, InterruptedException
+    public GitHubCardsApi getGitHubCardsApi()
     {
-        String body = getCachedBody(path, requestBuilder);
-        return gson.fromJson(body, t);
+        return this.gitHubCardsApi;
     }
 
-    protected String getCachedBody(String path, Function<HttpRequest.Builder, HttpRequest> requestBuilder) throws IOException, InterruptedException
+    public GitHubColumnsApi getGitHubColumnsApi()
     {
-        try
-        {
-            String body = cache.getCached(path);
-            if (body != null)
-            {
-                LOG.debug("Returning Cached from {}", path);
-                return body;
-            }
-
-            RateLeft rateLeft = getRateLeft();
-            int remainingRate = rateLeft.applyRequest("core");
-            URI uri = apiURI.resolve(path);
-            LOG.debug("Issuing API Request {} ({} remaining limit)", uri, remainingRate);
-            HttpRequest request = requestBuilder.apply(baseRequest.copy().uri(uri));
-            HttpResponse<String> response = client.send(request, responseInfo -> HttpResponse.BodySubscribers.ofString(UTF_8));
-            switch (response.statusCode())
-            {
-                case 200:
-                    cache.save(path, response.body());
-                    return response.body();
-                case 403:
-                    cache.saveNotFound(path);
-                    throw new GitHubNotPermittedException("Not permitted to get [" + path + "]: status code: " + response.statusCode());
-                case 404:
-                    cache.saveNotFound(path);
-                    throw new GitHubResourceNotFoundException(path);
-                default:
-                {
-                    LOG.warn("Failed Response: {}", response.body());
-                    throw new GitHubApiException("Unable to " + request.method() + " [" + request.uri() + "]: status code: " + response.statusCode());
-                }
-            }
-        }
-        catch (GitHubResourceNotFoundException e)
-        {
-            throw e;
-        }
+        return this.gitHubColumnsApi;
     }
 
-    private RateLeft getRateLeft() throws IOException, InterruptedException
+    public GitHubProjectsApi getGitHubProjectApi()
     {
-        if ((rateLeft == null) || (rateLeft.isExpired()))
-        {
-            RateLimits rateLimits = getRateLimits();
-            rateLeft = new RateLeft(rateLimits);
-        }
-        return rateLeft;
+        return this.gitHubProjectsApi;
+    }
+
+    public Issue getIssueFromCard(Card card) throws IOException, InterruptedException
+    {
+        return GitHubApi.connect().query(card.getContentUrl(), Issue.class, builder -> builder.GET()
+            .header("Accept", "application/vnd.github.v3+json")
+            .build());
     }
 
     public RateLimits getRateLimits() throws IOException, InterruptedException
@@ -291,16 +319,6 @@ public class GitHubApi
         return gson.fromJson(body, Issue.class);
     }
 
-    public IssueTimeline issueTimeline(String repoOwner, String repoName, int issueNum) throws IOException, InterruptedException
-    {
-        String path = String.format("/repos/%s/%s/issues/%d/timeline", repoOwner, repoName, issueNum);
-        String body = getCachedBody(path, (requestBuilder) ->
-            requestBuilder.GET()
-                .header("Accept", "application/vnd.github.v3+json")
-                .build());
-        return gson.fromJson(body, IssueTimeline.class);
-    }
-
     public List<CrossReference> issueCrossReferences(String repoOwner, String repoName, int issueNum) throws IOException, InterruptedException
     {
         Map<String, String> optionMap = new HashMap<>();
@@ -310,65 +328,6 @@ public class GitHubApi
         String query = loadQuery("/graphql-templates/query-issue-timeline-crossref-pullrequests.graphql", optionMap);
         String body = graphql(query);
         return loadCrossReferences(body);
-    }
-
-    protected static List<CrossReference> loadCrossReferences(String body)
-    {
-        Gson gson = new GsonBuilder()
-            .registerTypeHierarchyAdapter(ZonedDateTime.class, new ISO8601TypeAdapter())
-            .setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
-            .create();
-
-        JsonObject jsonObj = gson.fromJson(body, JsonObject.class);
-        JsonObject data = jsonObj.getAsJsonObject("data");
-        JsonObject repository = data.getAsJsonObject("repository");
-        JsonObject issue = repository.getAsJsonObject("issue");
-        JsonObject timelineItems = issue.getAsJsonObject("timelineItems");
-        JsonArray timelineArray = timelineItems.getAsJsonArray("nodes");
-
-        List<CrossReference> crossReferences = new ArrayList<>();
-        for (JsonElement nodeElem : timelineArray)
-        {
-            JsonObject entry = nodeElem.getAsJsonObject();
-            JsonElement source = entry.get("source");
-            CrossReference crossReference = gson.fromJson(source.toString(), CrossReference.class);
-            if (crossReference.getUrl() == null)
-                continue; // skip
-            crossReferences.add(crossReference);
-        }
-
-        return crossReferences;
-    }
-
-    public static String loadQuery(String templatePath, Map<String, String> optionMap) throws IOException
-    {
-        URL url = GitHubApi.class.getResource(templatePath);
-        if (url == null)
-            throw new FileNotFoundException("Unable to find template resource: " + templatePath);
-
-        try (InputStream in = url.openStream();
-             InputStreamReader reader = new InputStreamReader(in, UTF_8))
-        {
-            String templateStr = CharStreams.toString(reader);
-            StringBuilder output = new StringBuilder();
-            Pattern replacementPattern = Pattern.compile("@([^@]+)@");
-            Matcher matcher = replacementPattern.matcher(templateStr);
-            int offset = 0;
-            while (matcher.find(offset))
-            {
-                String key = matcher.group(1);
-                output.append(templateStr, offset, matcher.start(0));
-                String result = optionMap.get(key);
-                if (result != null)
-                    output.append(result);
-                else
-                    output.append('@').append(key).append('@'); // failed match
-                offset = matcher.end(0);
-            }
-            output.append(templateStr.substring(offset));
-
-            return output.toString();
-        }
     }
 
     public IssueEvents issueEvents(String repoOwner, String repoName, int issueNum) throws IOException, InterruptedException
@@ -381,14 +340,14 @@ public class GitHubApi
         return gson.fromJson(body, IssueEvents.class);
     }
 
-    public PullRequest pullRequest(String repoOwner, String repoName, int prNum) throws IOException, InterruptedException
+    public IssueTimeline issueTimeline(String repoOwner, String repoName, int issueNum) throws IOException, InterruptedException
     {
-        String path = String.format("/repos/%s/%s/pulls/%d", repoOwner, repoName, prNum);
+        String path = String.format("/repos/%s/%s/issues/%d/timeline", repoOwner, repoName, issueNum);
         String body = getCachedBody(path, (requestBuilder) ->
             requestBuilder.GET()
                 .header("Accept", "application/vnd.github.v3+json")
                 .build());
-        return gson.fromJson(body, PullRequest.class);
+        return gson.fromJson(body, IssueTimeline.class);
     }
 
     public PullRequests listPullRequests(String repoOwner, String repoName, IssueState issueState, int resultsPerPage, int pageNum) throws IOException, InterruptedException
@@ -409,31 +368,19 @@ public class GitHubApi
         return gson.fromJson(body, PullRequests.class);
     }
 
-    public PullRequestCommits pullRequestCommits(String repoOwner, String repoName, int prNum) throws IOException, InterruptedException
+    public Releases listReleases(String repoOwner, String repoName, int resultsPerPage, int pageNum) throws IOException, InterruptedException
     {
-        String path = String.format("/repos/%s/%s/pulls/%d/commits", repoOwner, repoName, prNum);
+        Query query = new Query();
+        query.put("per_page", String.valueOf(resultsPerPage));
+        query.put("page", String.valueOf(pageNum));
+
+        String path = String.format("/repos/%s/%s/releases?%s", repoOwner, repoName, query.toEncodedQuery());
+
         String body = getCachedBody(path, (requestBuilder) ->
             requestBuilder.GET()
                 .header("Accept", "application/vnd.github.v3+json")
                 .build());
-        return gson.fromJson(body, PullRequestCommits.class);
-    }
-
-    public PullRequests commitPullRequests(String repoOwner, String repoName, String commit) throws IOException, InterruptedException
-    {
-        String path = String.format("/repos/%s/%s/commits/%s/pulls", repoOwner, repoName, commit);
-        String body = getCachedBody(path, (requestBuilder) ->
-                requestBuilder.GET()
-                        .header("Accept", "application/vnd.github.v3+json")
-                        .build());
-        return gson.fromJson(body, PullRequests.class);
-    }
-
-    public Issue getIssueFromCard(Card card) throws IOException, InterruptedException
-    {
-        return GitHubApi.connect().query(card.getContentUrl(), Issue.class, builder -> builder.GET()
-            .header("Accept", "application/vnd.github.v3+json")
-            .build());
+        return gson.fromJson(body, Releases.class);
     }
 
     public Repositories listRepositories(String repoOwner, int resultsPerPage, int pageNum) throws IOException, InterruptedException
@@ -466,14 +413,35 @@ public class GitHubApi
         return gson.fromJson(body, Users.class);
     }
 
+    public PullRequest pullRequest(String repoOwner, String repoName, int prNum) throws IOException, InterruptedException
+    {
+        String path = String.format("/repos/%s/%s/pulls/%d", repoOwner, repoName, prNum);
+        String body = getCachedBody(path, (requestBuilder) ->
+            requestBuilder.GET()
+                .header("Accept", "application/vnd.github.v3+json")
+                .build());
+        return gson.fromJson(body, PullRequest.class);
+    }
+
+    public PullRequestCommits pullRequestCommits(String repoOwner, String repoName, int prNum) throws IOException, InterruptedException
+    {
+        String path = String.format("/repos/%s/%s/pulls/%d/commits", repoOwner, repoName, prNum);
+        String body = getCachedBody(path, (requestBuilder) ->
+            requestBuilder.GET()
+                .header("Accept", "application/vnd.github.v3+json")
+                .build());
+        return gson.fromJson(body, PullRequestCommits.class);
+    }
+
+    public <T> T query(String path, Class<T> t, Function<HttpRequest.Builder, HttpRequest> requestBuilder) throws IOException, InterruptedException
+    {
+        String body = getCachedBody(path, requestBuilder);
+        return gson.fromJson(body, t);
+    }
+
     public String raw(String path, Function<HttpRequest.Builder, HttpRequest> requestBuilder) throws IOException, InterruptedException
     {
         return getCachedBody(path, requestBuilder);
-    }
-
-    public Stream<Release> streamReleases(String repoOwner, String repoName)
-    {
-        return streamReleases(repoOwner, repoName, 20);
     }
 
     public Stream<PullRequest> streamPullRequests(String repoOwner, String repoName, IssueState issueState, int resultsPerPage)
@@ -481,6 +449,11 @@ public class GitHubApi
         ListSplitIterator.DataSupplier dataSupplier =
             activePage -> listPullRequests(repoOwner, repoName, issueState, resultsPerPage, activePage);
         return StreamSupport.stream(new ListSplitIterator<PullRequest>(this, dataSupplier), false);
+    }
+
+    public Stream<Release> streamReleases(String repoOwner, String repoName)
+    {
+        return streamReleases(repoOwner, repoName, 20);
     }
 
     public Stream<Release> streamReleases(String repoOwner, String repoName, int resultsPerPage)
@@ -504,34 +477,60 @@ public class GitHubApi
         return StreamSupport.stream(new ListSplitIterator<User>(this, dataSupplier), false);
     }
 
-    public Releases listReleases(String repoOwner, String repoName, int resultsPerPage, int pageNum) throws IOException, InterruptedException
+    protected String getCachedBody(String path, Function<HttpRequest.Builder, HttpRequest> requestBuilder) throws IOException, InterruptedException
     {
-        Query query = new Query();
-        query.put("per_page", String.valueOf(resultsPerPage));
-        query.put("page", String.valueOf(pageNum));
+        try
+        {
+            String body = cache.getCached(path);
+            if (body != null)
+            {
+                LOG.debug("Returning Cached from {}", path);
+                return body;
+            }
 
-        String path = String.format("/repos/%s/%s/releases?%s", repoOwner, repoName, query.toEncodedQuery());
-
-        String body = getCachedBody(path, (requestBuilder) ->
-            requestBuilder.GET()
-                .header("Accept", "application/vnd.github.v3+json")
-                .build());
-        return gson.fromJson(body, Releases.class);
+            RateLeft rateLeft = getRateLeft();
+            int remainingRate = rateLeft.applyRequest("core");
+            URI uri = apiURI.resolve(path);
+            LOG.debug("Issuing API Request {} ({} remaining limit)", uri, remainingRate);
+            HttpRequest request = requestBuilder.apply(baseRequest.copy().uri(uri));
+            HttpResponse<String> response = client.send(request, responseInfo -> HttpResponse.BodySubscribers.ofString(UTF_8));
+            switch (response.statusCode())
+            {
+                case 200:
+                    cache.save(path, response.body());
+                    return response.body();
+                case 403:
+                    cache.saveNotFound(path);
+                    throw new GitHubNotPermittedException("Not permitted to get [" + path + "]: status code: " + response.statusCode());
+                case 404:
+                    cache.saveNotFound(path);
+                    throw new GitHubResourceNotFoundException(path);
+                default:
+                {
+                    LOG.warn("Failed Response: {}", response.body());
+                    throw new GitHubApiException("Unable to " + request.method() + " [" + request.uri() + "]: status code: " + response.statusCode());
+                }
+            }
+        }
+        catch (GitHubResourceNotFoundException e)
+        {
+            throw e;
+        }
     }
 
-    public GitHubProjectsApi getGitHubProjectApi()
+    protected Gson getGson()
     {
-        return this.gitHubProjectsApi;
+        return this.gson;
     }
 
-    public GitHubColumnsApi getGitHubColumnsApi()
+    private RateLeft getRateLeft() throws IOException, InterruptedException
     {
-        return this.gitHubColumnsApi;
-    }
-
-    public GitHubCardsApi getGitHubCardsApi()
-    {
-        return this.gitHubCardsApi;
+        if ((rateLeft == null) || (rateLeft.isExpired()))
+        {
+            RateLimits rateLimits = getRateLimits();
+            rateLeft = new RateLeft(rateLimits);
+        }
+        return rateLeft;
     }
 
     static class Query extends HashMap<String, String>

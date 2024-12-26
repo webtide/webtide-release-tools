@@ -40,6 +40,19 @@ public class IssueScanner
         return issueNums;
     }
 
+    private static void scanPattern(Set<Integer> issueNums, String message, String regex)
+    {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(message);
+        int offset = 0;
+        while (matcher.find(offset))
+        {
+            int issueNum = Integer.parseInt(matcher.group(1));
+            issueNums.add(issueNum);
+            offset = matcher.end();
+        }
+    }
+
     public static Set<Integer> scanResolutions(String message)
     {
         // skip dependabot bodies
@@ -54,18 +67,5 @@ public class IssueScanner
         scanPattern(issueNums, message, "Fix #?([0-9]{3,6})");
         scanPattern(issueNums, message, "Resolve[sd] #?([0-9]{3,6})");
         return issueNums;
-    }
-
-    private static void scanPattern(Set<Integer> issueNums, String message, String regex)
-    {
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(message);
-        int offset = 0;
-        while (matcher.find(offset))
-        {
-            int issueNum = Integer.parseInt(matcher.group(1));
-            issueNums.add(issueNum);
-            offset = matcher.end();
-        }
     }
 }

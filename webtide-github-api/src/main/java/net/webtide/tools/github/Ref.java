@@ -17,13 +17,13 @@ public class Ref
     protected String prefix;
     protected String name;
 
-    public String getPrefix()
-    {
-        return prefix;
-    }
-
     public String getName()
     {
         return name;
+    }
+
+    public String getPrefix()
+    {
+        return prefix;
     }
 }

@@ -23,23 +23,18 @@ public class GitHubProjectsApi
 {
     private final GitHubApi gitHubApi;
 
-    public GitHubProjectsApi( GitHubApi gitHubApi)
+    public GitHubProjectsApi(GitHubApi gitHubApi)
     {
         this.gitHubApi = gitHubApi;
-    }
-
-    public Stream<Project> streamProjects(String repoOwner, String repoName, int resultsPerPage)
-    {
-        ListSplitIterator.DataSupplier dataSupplier =
-            activePage -> listProjects(repoOwner, repoName, resultsPerPage, activePage);
-        return StreamSupport.stream(new ListSplitIterator<Project>(this.gitHubApi, dataSupplier), false);
     }
 
     public Projects listProjects(String repoOwner, String repoName, int resultsPerPage, int pageNum) throws IOException, InterruptedException
     {
         GitHubApi.Query query = new GitHubApi.Query();
-        if (resultsPerPage > 0) query.put("per_page", String.valueOf(resultsPerPage));
-        if (pageNum > 0) query.put("page", String.valueOf(pageNum));
+        if (resultsPerPage > 0)
+            query.put("per_page", String.valueOf(resultsPerPage));
+        if (pageNum > 0)
+            query.put("page", String.valueOf(pageNum));
 
         String path = String.format("/repos/%s/%s/projects?%s", repoOwner, repoName, query.toEncodedQuery());
 
@@ -50,4 +45,10 @@ public class GitHubProjectsApi
         return this.gitHubApi.getGson().fromJson(body, Projects.class);
     }
 
+    public Stream<Project> streamProjects(String repoOwner, String repoName, int resultsPerPage)
+    {
+        ListSplitIterator.DataSupplier dataSupplier =
+            activePage -> listProjects(repoOwner, repoName, resultsPerPage, activePage);
+        return StreamSupport.stream(new ListSplitIterator<Project>(this.gitHubApi, dataSupplier), false);
+    }
 }

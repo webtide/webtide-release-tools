@@ -13,6 +13,7 @@
 package net.webtide.tools.release;
 
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class Main
 {
@@ -42,10 +43,16 @@ public class Main
                 Files.createDirectories(config.outputPath);
             }
 
-            var saveRequest = SaveRequestBuilder.builder().outputDir(config.outputPath)
-                    .includeDependencyChanges(config.includeDependencyChanges)
-                    .outputFormat(SaveRequest.OUTPUT_FORMAT.MARKDOWN)
-                    .build();
+            String projectVersion = null;
+            String date = null;
+            Path outputFile = null;
+
+            SaveRequest saveRequest = new SaveRequest(config.outputPath,
+                config.includeDependencyChanges,
+                SaveRequest.OUTPUT_FORMAT.MARKDOWN,
+                projectVersion,
+                date,
+                outputFile);
             changelog.save(saveRequest);
             System.out.printf("Wrote changelog to %s%n", config.outputPath.toAbsolutePath());
         }

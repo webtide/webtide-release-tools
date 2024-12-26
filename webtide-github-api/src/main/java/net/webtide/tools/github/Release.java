@@ -27,9 +27,34 @@ public class Release
     protected ZonedDateTime createdAt;
     protected ZonedDateTime publishedAt;
 
+    public User getAuthor()
+    {
+        return author;
+    }
+
+    public String getBody()
+    {
+        return body;
+    }
+
+    public ZonedDateTime getCreatedAt()
+    {
+        return createdAt;
+    }
+
     public int getId()
     {
         return id;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public ZonedDateTime getPublishedAt()
+    {
+        return publishedAt;
     }
 
     public String getTagName()
@@ -42,16 +67,6 @@ public class Release
         return targetCommitish;
     }
 
-    public String getName()
-    {
-        return name;
-    }
-
-    public String getBody()
-    {
-        return body;
-    }
-
     public boolean isDraft()
     {
         return draft;
@@ -60,20 +75,5 @@ public class Release
     public boolean isPrerelease()
     {
         return prerelease;
-    }
-
-    public User getAuthor()
-    {
-        return author;
-    }
-
-    public ZonedDateTime getCreatedAt()
-    {
-        return createdAt;
-    }
-
-    public ZonedDateTime getPublishedAt()
-    {
-        return publishedAt;
     }
 }

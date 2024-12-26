@@ -12,34 +12,33 @@
 
 package net.webtide.tools.github;
 
-import java.io.IOException;
 import java.time.ZonedDateTime;
 
 public class Column
 {
-    private long id;
     protected String name;
     protected ZonedDateTime createdAt;
     protected ZonedDateTime updatedAt;
-
-    public String getName()
-    {
-        return name;
-    }
+    private long id;
 
     public ZonedDateTime getCreatedAt()
     {
         return createdAt;
     }
 
-    public ZonedDateTime getUpdatedAt()
-    {
-        return updatedAt;
-    }
-
     public long getId()
     {
         return id;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public ZonedDateTime getUpdatedAt()
+    {
+        return updatedAt;
     }
 
     @Override

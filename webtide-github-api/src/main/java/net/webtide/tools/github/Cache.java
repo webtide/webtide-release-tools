@@ -27,6 +27,15 @@ public interface Cache
     String getCached(String path) throws GitHubResourceNotFoundException, IOException;
 
     /**
+     * Save to the cache the body content.
+     *
+     * @param path the path to cache
+     * @param body the contents to cache
+     * @throws IOException if unable to save the cache entry
+     */
+    void save(String path, String body) throws IOException;
+
+    /**
      * Save to the cache a not found path.
      * <p>
      * Will result in a GitHubResourceNotFoundException for all requests for the same path on {@link #getCached(String)}
@@ -36,13 +45,4 @@ public interface Cache
      * @throws IOException if unable to save the cache entry
      */
     void saveNotFound(String path) throws IOException;
-
-    /**
-     * Save to the cache the body content.
-     *
-     * @param path the path to cache
-     * @param body the contents to cache
-     * @throws IOException if unable to save the cache entry
-     */
-    void save(String path, String body) throws IOException;
 }

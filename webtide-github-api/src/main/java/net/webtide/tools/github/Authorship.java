@@ -20,14 +20,14 @@ public class Authorship
     protected String email;
     protected ZonedDateTime timestamp;
 
-    public String getName()
-    {
-        return name;
-    }
-
     public String getEmail()
     {
         return email;
+    }
+
+    public String getName()
+    {
+        return name;
     }
 
     public ZonedDateTime getTimestamp()

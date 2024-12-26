@@ -99,6 +99,11 @@ public class PullRequest extends Issue
         return reviewComments;
     }
 
+    public boolean isDraft()
+    {
+        return draft;
+    }
+
     public boolean isLocked()
     {
         return locked;
@@ -107,10 +112,5 @@ public class PullRequest extends Issue
     public boolean isMerged()
     {
         return merged;
-    }
-
-    public boolean isDraft()
-    {
-        return draft;
     }
 }

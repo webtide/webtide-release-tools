@@ -18,11 +18,6 @@ public class Verification
     protected String reason;
     protected String signature;
 
-    public boolean isVerified()
-    {
-        return verified;
-    }
-
     public String getReason()
     {
         return reason;
@@ -31,5 +26,10 @@ public class Verification
     public String getSignature()
     {
         return signature;
+    }
+
+    public boolean isVerified()
+    {
+        return verified;
     }
 }

@@ -45,11 +45,6 @@ public class PullRequestCommits extends ArrayList<PullRequestCommits.Commit>
         protected Details commit;
         protected List<Sha> parents = new ArrayList<>();
 
-        public String getSha()
-        {
-            return sha;
-        }
-
         public Details getCommit()
         {
             return commit;
@@ -58,6 +53,11 @@ public class PullRequestCommits extends ArrayList<PullRequestCommits.Commit>
         public List<Sha> getParents()
         {
             return parents;
+        }
+
+        public String getSha()
+        {
+            return sha;
         }
     }
 }

@@ -36,14 +36,14 @@ public class MemoryCache implements Cache
     }
 
     @Override
-    public void saveNotFound(String path)
-    {
-        notFoundSet.add(path);
-    }
-
-    @Override
     public void save(String path, String body)
     {
         cached.put(path, body);
+    }
+
+    @Override
+    public void saveNotFound(String path)
+    {
+        notFoundSet.add(path);
     }
 }

@@ -12,7 +12,6 @@
 
 package net.webtide.tools.github;
 
-import java.io.IOException;
 import java.time.ZonedDateTime;
 
 public class Card
@@ -24,14 +23,14 @@ public class Card
     protected Issue issue;
     protected String content_url;
 
-    public String getNote()
-    {
-        return note;
-    }
-
     public ZonedDateTime getCreatedAt()
     {
         return createdAt;
+    }
+
+    public String getNote()
+    {
+        return note;
     }
 
     public ZonedDateTime getUpdatedAt()
@@ -43,5 +42,4 @@ public class Card
     {
         return content_url;
     }
-
 }

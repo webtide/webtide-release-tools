@@ -56,6 +56,20 @@ public class Config
     // output path to generate changelog details
     protected Path outputPath;
 
+    public static Config loadConfig(Path path) throws IOException
+    {
+        Gson gson = new GsonBuilder()
+            .registerTypeAdapter(ZonedDateTime.class, new ISO8601TypeAdapter())
+            .registerTypeAdapter(Path.class, new PathTypeAdapter())
+            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+            .create();
+
+        try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8))
+        {
+            return gson.fromJson(reader, Config.class);
+        }
+    }
+
     public static Config parseArgs(Args args) throws IOException
     {
         Config config = null;
@@ -94,50 +108,6 @@ public class Config
         return config;
     }
 
-    public static Config loadConfig(Path path) throws IOException
-    {
-        Gson gson = new GsonBuilder()
-            .registerTypeAdapter(ZonedDateTime.class, new ISO8601TypeAdapter())
-            .registerTypeAdapter(Path.class, new PathTypeAdapter())
-            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-            .create();
-
-        try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8))
-        {
-            return gson.fromJson(reader, Config.class);
-        }
-    }
-
-    public Path getRepoPath()
-    {
-        return repoPath;
-    }
-
-    public void setRepoPath(Path repoPath)
-    {
-        this.repoPath = repoPath;
-    }
-
-    public String getGithubRepoOwner()
-    {
-        return githubRepoOwner;
-    }
-
-    public void setGithubRepoOwner(String githubRepoOwner)
-    {
-        this.githubRepoOwner = githubRepoOwner;
-    }
-
-    public String getGithubRepoName()
-    {
-        return githubRepoName;
-    }
-
-    public void setGithubRepoName(String githubRepoName)
-    {
-        this.githubRepoName = githubRepoName;
-    }
-
     public String getBranch()
     {
         return branch;
@@ -146,46 +116,6 @@ public class Config
     public void setBranch(String branch)
     {
         this.branch = branch;
-    }
-
-    public String getTagVersionPrior()
-    {
-        return tagVersionPrior;
-    }
-
-    public void setTagVersionPrior(String tagVersionPrior)
-    {
-        this.tagVersionPrior = tagVersionPrior;
-    }
-
-    public String getRefVersionCurrent()
-    {
-        return refVersionCurrent;
-    }
-
-    public void setRefVersionCurrent(String refVersionCurrent)
-    {
-        this.refVersionCurrent = refVersionCurrent;
-    }
-
-    public List<String> getLabelExclusions()
-    {
-        return labelExclusions;
-    }
-
-    public void setLabelExclusions(List<String> labelExclusions)
-    {
-        this.labelExclusions = labelExclusions;
-    }
-
-    public List<String> getCommitPathRegexExclusions()
-    {
-        return commitPathRegexExclusions;
-    }
-
-    public void setCommitPathRegexExclusions(List<String> commitPathRegexExclusions)
-    {
-        this.commitPathRegexExclusions = commitPathRegexExclusions;
     }
 
     public List<String> getBranchRegexExclusions()
@@ -198,14 +128,44 @@ public class Config
         this.branchRegexExclusions = branchRegexExclusions;
     }
 
-    public boolean isIncludeDependencyChanges()
+    public List<String> getCommitPathRegexExclusions()
     {
-        return includeDependencyChanges;
+        return commitPathRegexExclusions;
     }
 
-    public void setIncludeDependencyChanges(boolean includeDependencyChanges)
+    public void setCommitPathRegexExclusions(List<String> commitPathRegexExclusions)
     {
-        this.includeDependencyChanges = includeDependencyChanges;
+        this.commitPathRegexExclusions = commitPathRegexExclusions;
+    }
+
+    public String getGithubRepoName()
+    {
+        return githubRepoName;
+    }
+
+    public void setGithubRepoName(String githubRepoName)
+    {
+        this.githubRepoName = githubRepoName;
+    }
+
+    public String getGithubRepoOwner()
+    {
+        return githubRepoOwner;
+    }
+
+    public void setGithubRepoOwner(String githubRepoOwner)
+    {
+        this.githubRepoOwner = githubRepoOwner;
+    }
+
+    public List<String> getLabelExclusions()
+    {
+        return labelExclusions;
+    }
+
+    public void setLabelExclusions(List<String> labelExclusions)
+    {
+        this.labelExclusions = labelExclusions;
     }
 
     public Path getOutputPath()
@@ -216,5 +176,45 @@ public class Config
     public void setOutputPath(Path outputPath)
     {
         this.outputPath = outputPath;
+    }
+
+    public String getRefVersionCurrent()
+    {
+        return refVersionCurrent;
+    }
+
+    public void setRefVersionCurrent(String refVersionCurrent)
+    {
+        this.refVersionCurrent = refVersionCurrent;
+    }
+
+    public Path getRepoPath()
+    {
+        return repoPath;
+    }
+
+    public void setRepoPath(Path repoPath)
+    {
+        this.repoPath = repoPath;
+    }
+
+    public String getTagVersionPrior()
+    {
+        return tagVersionPrior;
+    }
+
+    public void setTagVersionPrior(String tagVersionPrior)
+    {
+        this.tagVersionPrior = tagVersionPrior;
+    }
+
+    public boolean isIncludeDependencyChanges()
+    {
+        return includeDependencyChanges;
+    }
+
+    public void setIncludeDependencyChanges(boolean includeDependencyChanges)
+    {
+        this.includeDependencyChanges = includeDependencyChanges;
     }
 }

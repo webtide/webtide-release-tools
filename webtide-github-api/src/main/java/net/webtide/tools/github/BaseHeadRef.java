@@ -30,6 +30,11 @@ public class BaseHeadRef
         return ref;
     }
 
+    public Repository getRepo()
+    {
+        return repo;
+    }
+
     public String getSha()
     {
         return sha;
@@ -38,10 +43,5 @@ public class BaseHeadRef
     public User getUser()
     {
         return user;
-    }
-
-    public Repository getRepo()
-    {
-        return repo;
     }
 }
