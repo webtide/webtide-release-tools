@@ -57,6 +57,7 @@ import net.webtide.tools.github.gson.ISO8601TypeAdapter;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.LogCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -603,8 +604,8 @@ public class ChangelogTool implements AutoCloseable
         }
 
         // nothing found so we return head of branch
-        var headRef = repository.findRef(branch);
-        var headHash = headRef.getObjectId();
+        Ref headRef = repository.findRef(branch);
+        ObjectId headHash = headRef.getObjectId();
         try (RevWalk walk = new RevWalk(repository))
         {
             return walk.parseCommit(headHash);
