@@ -15,14 +15,14 @@ package net.webtide.tools.release.plugins;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import net.webtide.tools.release.ChangeMetadata;
 import net.webtide.tools.release.Config;
-import net.webtide.tools.release.SaveRequest;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 
-import static net.webtide.tools.release.SaveRequest.OUTPUT_FORMAT.MARKDOWN;
+import static net.webtide.tools.release.ChangeMetadata.OUTPUT_FORMAT.MARKDOWN;
 
 /**
  * Produce a target/version-tag.txt which represents the changes
@@ -39,7 +39,7 @@ public class GitHubReleaseMojo extends AbstractReleaseToolsPlugin
         {
             SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
             Config config = buildConfig();
-            SaveRequest saveRequest = new SaveRequest(
+            ChangeMetadata saveRequest = new ChangeMetadata(
                 config.getOutputPath(),
                 config.isIncludeDependencyChanges(),
                 MARKDOWN,

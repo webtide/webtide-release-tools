@@ -14,8 +14,6 @@ package net.webtide.tools.release;
 
 import java.nio.file.Files;
 
-import static net.webtide.tools.release.SaveRequest.OUTPUT_FORMAT.MARKDOWN;
-
 public class Main
 {
     public static void main(String[] args) throws Exception
@@ -47,11 +45,12 @@ public class Main
             String projectVersion = null;
             String date = null;
 
-            SaveRequest saveRequest = new SaveRequest(config.outputPath,
-                config.includeDependencyChanges,
-                MARKDOWN,
+            config.getOutputTypes().add(WriteOutput.Type.MARKDOWN);
+
+            ChangeMetadata saveRequest = new ChangeMetadata(config,
                 projectVersion,
-                date);
+                date,
+                changelog.getChanges());
             changelog.save(saveRequest);
             System.out.printf("Wrote changelog to %s%n", config.outputPath.toAbsolutePath());
         }

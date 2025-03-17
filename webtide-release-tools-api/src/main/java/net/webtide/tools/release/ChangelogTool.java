@@ -14,7 +14,7 @@ package net.webtide.tools.release;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -36,7 +36,6 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.google.common.base.Strings;
 import com.google.gson.FieldNamingPolicy;
@@ -165,6 +164,11 @@ public class ChangelogTool implements AutoCloseable
     public Collection<ChangeCommit> getCommits()
     {
         return this.commitMap.values();
+    }
+
+    public List<Change> getChanges()
+    {
+        return changes;
     }
 
     public ChangeIssue getIssue(int num)
@@ -379,7 +383,7 @@ public class ChangelogTool implements AutoCloseable
         {
             List<ChangeIssue> unknownIssues = issueMap.values().stream()
                 .filter((issue) -> issue.getType() == IssueType.UNKNOWN)
-                .collect(Collectors.toList());
+                .toList();
 
             if (unknownIssues.isEmpty())
                 done = true;
@@ -397,42 +401,42 @@ public class ChangelogTool implements AutoCloseable
         LOG.debug("Tracking {} issues", issueMap.size());
     }
 
-    public void save(SaveRequest saveRequest) throws IOException
+    public void save(ChangeMetadata changeMetadata) throws IOException
     {
         Gson gson = new GsonBuilder().setPrettyPrinting()
             .registerTypeAdapter(ZonedDateTime.class, new ISO8601TypeAdapter())
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .create();
 
-        Path authorsLog = saveRequest.outputDir().resolve("authors-scan.json");
+        Path authorsLog = changeMetadata.config().getOutputPath().resolve("authors-scan.json");
         try (BufferedWriter writer = Files.newBufferedWriter(authorsLog, UTF_8);
              JsonWriter jsonWriter = gson.newJsonWriter(writer))
         {
             gson.toJson(authors, Authors.class, jsonWriter);
         }
 
-        Path issueLog = saveRequest.outputDir().resolve("change-issues.json");
+        Path issueLog = changeMetadata.config().getOutputPath().resolve("change-issues.json");
         try (BufferedWriter writer = Files.newBufferedWriter(issueLog, UTF_8);
              JsonWriter jsonWriter = gson.newJsonWriter(writer))
         {
             gson.toJson(issueMap.values(), Set.class, jsonWriter);
         }
 
-        Path commitsLog = saveRequest.outputDir().resolve("change-commits.json");
+        Path commitsLog = changeMetadata.config().getOutputPath().resolve("change-commits.json");
         try (BufferedWriter writer = Files.newBufferedWriter(commitsLog, UTF_8);
              JsonWriter jsonWriter = gson.newJsonWriter(writer))
         {
             gson.toJson(commitMap.values(), Set.class, jsonWriter);
         }
 
-        Path changeLog = saveRequest.outputDir().resolve("change-groups.json");
+        Path changeLog = changeMetadata.config().getOutputPath().resolve("change-groups.json");
         try (BufferedWriter writer = Files.newBufferedWriter(changeLog, UTF_8);
              JsonWriter jsonWriter = gson.newJsonWriter(writer))
         {
             gson.toJson(changes, List.class, jsonWriter);
         }
 
-        Path changePaths = saveRequest.outputDir().resolve("change-paths.log");
+        Path changePaths = changeMetadata.config().getOutputPath().resolve("change-paths.log");
         try (BufferedWriter writer = Files.newBufferedWriter(changePaths))
         {
             Set<String> changedFiles = new HashSet<>();
@@ -451,12 +455,17 @@ public class ChangelogTool implements AutoCloseable
             System.out.printf("Found %,d Files changed in the various commits%n", changedFiles.size());
         }
 
-        switch (saveRequest.outputFormat())
+        for (WriteOutput.Type outputType : changeMetadata.config().getOutputTypes())
         {
-            case MARKDOWN:
-                writeMarkdown(saveRequest);
-            case TAG_TXT:
-                writeVersionTagTxt(saveRequest);
+            try
+            {
+                WriteOutput writeOutput = outputType.getType().getDeclaredConstructor().newInstance();
+                writeOutput.write(changeMetadata);
+            }
+            catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e)
+            {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -475,68 +484,6 @@ public class ChangelogTool implements AutoCloseable
     {
         this.tagOldVersion = tagOldVersion;
         this.refCurrentVersion = refCurrentVersion;
-    }
-
-    public void writeMarkdown(SaveRequest saveRequest) throws IOException
-    {
-        try (BufferedWriter writer = Files.newBufferedWriter(saveRequest.outputDir().resolve(saveRequest.outputFormat().getFilename()), UTF_8);
-             PrintWriter out = new PrintWriter(writer))
-        {
-            List<Change> relevantChanges = changes.stream()
-                .filter(Predicate.not(Change::isSkip))
-                .sorted(Comparator.comparingInt(Change::getRefNumber).reversed())
-                .toList();
-
-            // Collect list of community member participation
-            Set<String> community = new HashSet<>();
-            for (Change change : relevantChanges)
-            {
-                for (Author author : change.getAuthors())
-                {
-                    if (!author.committer())
-                    {
-                        community.add(String.format("%s (%s)", author.toNiceName(), author.name()));
-                    }
-                }
-            }
-
-            if (!community.isEmpty())
-            {
-                out.println("# Special Thanks to the following Eclipse Jetty community members");
-                out.println();
-                community.forEach((author) -> out.printf("* %s%n", author));
-                out.println();
-            }
-
-            // resolve titles, ids, etc ....
-            writeSection(out, "# Changelog", relevantChanges.stream().filter((c) ->
-                !c.hasLabel("dependencies")));
-
-            if (saveRequest.includeDependencyChanges())
-            {
-                writeSection(out, "# Dependencies", relevantChanges.stream()
-                    .filter((c) -> c.hasLabel("dependencies"))
-                    .map(new ChangelogTool.DependencyBumpSimplifier())
-                    .sorted(new ChangelogTool.DependencyBumpComparator())
-                    .filter(new ChangelogTool.DistinctDependencyBumpRef())
-                );
-            }
-        }
-    }
-
-    public void writeVersionTagTxt(SaveRequest saveRequest) throws IOException
-    {
-        try (BufferedWriter writer = Files.newBufferedWriter(saveRequest.outputDir().resolve(saveRequest.outputFormat().getFilename()), UTF_8);
-             PrintWriter out = new PrintWriter(writer))
-        {
-            List<Change> relevantChanges = changes.stream()
-                .filter(Predicate.not(Change::isSkip))
-                .sorted(Comparator.comparingInt(Change::getRefNumber).reversed())
-                .toList();
-
-            writeSection(out, " " + saveRequest.projectVersion() + " - " + saveRequest.date(), relevantChanges.stream().filter((c) ->
-                !c.hasLabel("dependencies")));
-        }
     }
 
     /**
@@ -852,29 +799,6 @@ public class ChangelogTool implements AutoCloseable
 
             issue.getReferencedIssues().forEach((ref) -> updateChangeIssues(change, ref));
             issue.getCommits().forEach((sha) -> updateChangeCommit(change, sha));
-        }
-    }
-
-    private void writeSection(PrintWriter out, String sectionName, Stream<Change> changesStream)
-    {
-        List<Change> changes = changesStream.toList();
-        if (!changes.isEmpty())
-        {
-            out.println();
-            out.println(sectionName);
-            out.println();
-
-            for (Change change : changes)
-            {
-                out.printf("+ #%d - ", change.getRefNumber());
-                out.print(change.getRefTitle());
-                Set<String> authors = change.getAuthors().stream().filter(Predicate.not(Author::committer)).map(Author::toNiceName).collect(Collectors.toSet());
-                if (!authors.isEmpty())
-                {
-                    out.printf(" (%s)", String.join(", ", authors));
-                }
-                out.print("\n");
-            }
         }
     }
 

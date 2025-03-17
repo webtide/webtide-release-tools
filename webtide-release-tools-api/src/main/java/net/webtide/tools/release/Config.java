@@ -55,6 +55,8 @@ public class Config
     protected boolean includeDependencyChanges = false;
     // output path to generate changelog details
     protected Path outputPath;
+    // types of output
+    protected List<WriteOutput.Type> outputTypes = new ArrayList<>();
 
     public static Config loadConfig(Path path) throws IOException
     {
@@ -176,6 +178,16 @@ public class Config
     public void setOutputPath(Path outputPath)
     {
         this.outputPath = outputPath;
+    }
+
+    public List<WriteOutput.Type> getOutputTypes()
+    {
+        return outputTypes;
+    }
+
+    public void setOutputTypes(List<WriteOutput.Type> outputTypes)
+    {
+        this.outputTypes = outputTypes;
     }
 
     public String getRefVersionCurrent()

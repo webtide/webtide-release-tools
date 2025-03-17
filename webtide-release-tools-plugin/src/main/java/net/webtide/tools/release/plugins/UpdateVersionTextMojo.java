@@ -24,7 +24,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
-import static net.webtide.tools.release.SaveRequest.OUTPUT_FORMAT.TAG_TXT;
+import static net.webtide.tools.release.ChangeMetadata.OUTPUT_FORMAT.TAG_TXT;
 
 @Mojo(name = "update-version-text", defaultPhase = LifecyclePhase.PACKAGE, threadSafe = true)
 public class UpdateVersionTextMojo extends TagMojo

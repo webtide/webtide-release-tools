@@ -12,26 +12,27 @@
 
 package net.webtide.tools.release;
 
-import java.nio.file.Path;
+import java.io.IOException;
 
-public record SaveRequest(Path outputDir, boolean includeDependencyChanges, OUTPUT_FORMAT outputFormat, String projectVersion,
-                          String date)
+public interface WriteOutput
 {
-    public enum OUTPUT_FORMAT
+    enum Type
     {
-        MARKDOWN("changelog.md"),
-        TAG_TXT("version-tag.txt");
+        MARKDOWN(WriteMarkdown.class),
+        VERSION_TXT(WriteVersionTagText.class);
 
-        String filename;
+        private final Class<? extends WriteOutput> type;
 
-        OUTPUT_FORMAT(String filename)
+        Type(Class<? extends WriteOutput> outputType)
         {
-            this.filename = filename;
+            this.type = outputType;
         }
 
-        public String getFilename()
+        public Class<? extends WriteOutput> getType()
         {
-            return filename;
+            return type;
         }
     }
+
+    void write(ChangeMetadata change) throws IOException;
 }

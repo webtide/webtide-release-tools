@@ -18,9 +18,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import net.webtide.tools.release.ChangeMetadata;
 import net.webtide.tools.release.ChangelogTool;
 import net.webtide.tools.release.Config;
-import net.webtide.tools.release.SaveRequest;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -44,7 +44,7 @@ public abstract class AbstractReleaseToolsPlugin extends AbstractMojo
     private String tagVersionPrior;
     private Config config;
 
-    public void doExecute(SaveRequest saveRequest) throws MojoExecutionException, MojoFailureException
+    public void doExecute(ChangeMetadata saveRequest) throws MojoExecutionException, MojoFailureException
     {
 
         Config config = buildConfig();
