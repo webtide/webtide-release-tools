@@ -33,30 +33,32 @@ public class ChangeCommit extends ChangeRef
 
     public void addIssueRef(int ref)
     {
-        if (this.issueRefs == null)
-            this.issueRefs = new HashSet<>();
-        this.issueRefs.add(ref);
+        if (issueRefs == null)
+            issueRefs = new HashSet<>();
+        issueRefs.add(ref);
     }
 
     public void addIssueRefs(Collection<Integer> refs)
     {
-        if (this.issueRefs == null)
-            this.issueRefs = new HashSet<>();
-        this.issueRefs.addAll(refs);
+        if (issueRefs == null)
+            issueRefs = new HashSet<>();
+        issueRefs.addAll(refs);
     }
 
     public void addPullRequestRef(int ref)
     {
-        if (this.pullRequestRefs == null)
-            this.pullRequestRefs = new HashSet<>();
-        this.pullRequestRefs.add(ref);
+        if (pullRequestRefs == null)
+            pullRequestRefs = new HashSet<>();
+        pullRequestRefs.add(ref);
     }
 
     public void addPullRequestRefs(Collection<Integer> refs)
     {
-        if (this.pullRequestRefs == null)
-            this.pullRequestRefs = new HashSet<>();
-        this.pullRequestRefs.addAll(refs);
+        if (refs.isEmpty())
+            return;
+        if (pullRequestRefs == null)
+            pullRequestRefs = new HashSet<>();
+        pullRequestRefs.addAll(refs);
     }
 
     public Author getAuthor()

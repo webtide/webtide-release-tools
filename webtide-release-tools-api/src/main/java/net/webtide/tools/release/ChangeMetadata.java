@@ -12,8 +12,6 @@
 
 package net.webtide.tools.release;
 
-import java.util.List;
-
-public record ChangeMetadata(Config config, String projectVersion, String date, List<Change> changes)
+public record ChangeMetadata(Config config, String projectVersion, String date, Changelog changelog)
 {
 }

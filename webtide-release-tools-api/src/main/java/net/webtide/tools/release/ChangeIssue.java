@@ -128,9 +128,14 @@ public class ChangeIssue extends ChangeRef
     @Override
     public String toString()
     {
-        return "ChangeIssue{" +
-            "num=" + num +
-            ", title='" + title + '\'' +
-            '}';
+        StringBuilder str = new StringBuilder();
+        str.append("ChangeIssue{");
+        str.append("num=").append(num);
+        if (title != null)
+            str.append(", title='").append(title).append('\'');
+        if (!isResolved())
+            str.append(", UNRESOLVED");
+        str.append('}');
+        return str.toString();
     }
 }

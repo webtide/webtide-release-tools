@@ -35,7 +35,7 @@ public class WriteVersionTagText implements WriteOutput
         try (BufferedWriter writer = Files.newBufferedWriter(versionTxt, UTF_8);
              PrintWriter out = new PrintWriter(writer))
         {
-            List<Change> relevantChanges = changeMetadata.changes().stream()
+            List<Change> relevantChanges = changeMetadata.changelog().stream()
                 .filter(Predicate.not(Change::isSkip))
                 .sorted(Comparator.comparingInt(Change::getRefNumber).reversed())
                 .toList();

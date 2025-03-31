@@ -36,7 +36,7 @@ public class WriteMarkdown implements WriteOutput
         try (BufferedWriter writer = Files.newBufferedWriter(markdown, UTF_8);
              PrintWriter out = new PrintWriter(writer))
         {
-            List<Change> relevantChanges = changeMetadata.changes().stream()
+            List<Change> relevantChanges = changeMetadata.changelog().stream()
                 .filter(Predicate.not(Change::isSkip))
                 .sorted(Comparator.comparingInt(Change::getRefNumber).reversed())
                 .toList();
@@ -68,11 +68,12 @@ public class WriteMarkdown implements WriteOutput
 
             if (changeMetadata.config().isIncludeDependencyChanges())
             {
+                // Write out a filtered dependabot "Bump <dep> from <oldver> to <newver>" detail
                 writeSection(out, "# Dependencies", relevantChanges.stream()
                     .filter((c) -> c.hasLabel("dependencies"))
-                    .map(new ChangelogTool.DependencyBumpSimplifier())
-                    .sorted(new ChangelogTool.DependencyBumpComparator())
-                    .filter(new ChangelogTool.DistinctDependencyBumpRef())
+                    .map(new Dependencies.BumpFromToSimplifier())
+                    .sorted(new Dependencies.BumpToComparator())
+                    .filter(new Dependencies.BumpDistinct())
                 );
             }
         }
