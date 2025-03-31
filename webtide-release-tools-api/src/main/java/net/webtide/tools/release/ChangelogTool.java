@@ -925,8 +925,9 @@ public class ChangelogTool implements AutoCloseable
         ChangeCommit commit = this.commitMap.get(sha);
         if (commit != null)
         {
-            if (commit.hasChangeRef())
-                return; // ignore it, already referenced
+            if (commit.hasChangeRef() || // does it already have a change reference?
+                commit.isSkipped()) // is it skipped for some reason? (like a MISSING_REF)
+                return; // ignore it
 
             commit.setChangeRef(change);
 
