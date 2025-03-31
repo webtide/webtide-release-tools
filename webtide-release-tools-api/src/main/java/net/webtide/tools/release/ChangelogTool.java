@@ -301,7 +301,7 @@ public class ChangelogTool implements AutoCloseable
     {
         RevCommit commitOld = findCommitForTag(tagOldVersion);
         RevCommit commitNew = findCommitForCurrent();
-        LOG.debug("commit log: {} .. {}", commitOld, commitNew);
+        LOG.debug("commit log: {} .. {}", commitOld.getId().getName(), commitNew.getId().getName());
 
         int count = 0;
 
@@ -311,6 +311,7 @@ public class ChangelogTool implements AutoCloseable
         {
             Author author = getAuthor(authors, commit);
 
+            LOG.debug("Found commit: {} - {}", commit.getId().getName(), commit.getShortMessage());
             ChangeCommit changeCommit = getCommit(commit.getId().getName());
 
             changeCommit.setCommitTime(ZonedDateTime.ofInstant(Instant.ofEpochMilli(commit.getCommitTime()), ZoneId.systemDefault()));
