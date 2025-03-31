@@ -30,13 +30,13 @@ public class IssueScanner
 
         Set<Integer> issueNums = new HashSet<>();
         // Start of line
-        scanPattern(issueNums, message, "^#([0-9]{3,6})");
+        scanPattern(issueNums, message, "^#([0-9]{4,7})");
         // Not prefixed by ">" or alphanumeric character
         // we want to ignore things like "group/repo#1234" and "<a href='github.com/group/repo/issues/1234'>#1234</a>"
         // but allow things like "(#1234)"
-        scanPattern(issueNums, message, "[^\\p{Alpha}\\p{Digit}>]+#([0-9]{3,6})");
+        scanPattern(issueNums, message, "[^\\p{Alpha}\\p{Digit}>]+#([0-9]{3,7})");
         // Awkward issue reference (no hashsign)
-        scanPattern(issueNums, message, "Issue ([0-9]{3,6})");
+        scanPattern(issueNums, message, "Issue ([0-9]{4,7})");
         return issueNums;
     }
 
