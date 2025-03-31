@@ -45,7 +45,6 @@ import net.webtide.tools.github.GitHubResourceNotFoundException;
 import net.webtide.tools.github.Issue;
 import net.webtide.tools.github.IssueEvents;
 import net.webtide.tools.github.Label;
-import net.webtide.tools.github.PullRequest;
 import net.webtide.tools.github.PullRequestCommits;
 import net.webtide.tools.github.PullRequests;
 import net.webtide.tools.github.cache.PersistentCache;
@@ -74,6 +73,11 @@ public class ChangelogTool implements AutoCloseable
     private final ChangelogCache changelogCache;
     private final Authors authors = Authors.load();
     private final Changelog changelog = new Changelog();
+    private final Map<Integer, ChangeIssue> issueMap = new HashMap<>();
+    private final Map<String, ChangeCommit> commitMap = new HashMap<>();
+    private final List<Predicate<String>> branchExclusion = new ArrayList<>();
+    private final List<Predicate<String>> commitPathExclusionFilters = new ArrayList<>();
+    private final Set<String> excludedLabels = new HashSet<>();
     private String githubOwner;
     private String githubRepoName;
     private GitHubApi github;
@@ -81,11 +85,7 @@ public class ChangelogTool implements AutoCloseable
     private String branch;
     private String tagOldVersion;
     private String refCurrentVersion;
-    private Map<Integer, ChangeIssue> issueMap = new HashMap<>();
-    private Map<String, ChangeCommit> commitMap = new HashMap<>();
-    private List<Predicate<String>> branchExclusion = new ArrayList<>();
-    private List<Predicate<String>> commitPathExclusionFilters = new ArrayList<>();
-    private Set<String> excludedLabels = new HashSet<>();
+    private Predicate<String> branchesExclusionPredicate;
 
     public ChangelogTool(Path localGitRepo) throws IOException
     {
@@ -150,22 +150,16 @@ public class ChangelogTool implements AutoCloseable
 
     public void discoverChanges() throws IOException, InterruptedException, GitAPIException
     {
+        branchesExclusionPredicate = newStringPredicate(branchExclusion);
+
         // equivalent of git log <old>..<new>
         discoverCommitsInRange();
 
         // recursively find issue and pull request references in commits
         discoverChangesRecursively();
 
+        // resolve all the discovered commits and issues into a set of changes
         resolveChanges();
-
-        // resolve all title/body fields (in commits, issues, and prs) for textual issues references (recursively)
-        // resolveIssues();
-
-        // resolve all of the issue and pull requests commits
-        // resolveIssueCommits();
-
-        // link up commits / issues / pull requests
-        // linkActivity();
     }
 
     private void discoverChangesRecursively() throws IOException, InterruptedException
@@ -434,20 +428,6 @@ public class ChangelogTool implements AutoCloseable
         }
     }
 
-    private ChangeIssue findRelevantIssue(Set<Integer> nums)
-    {
-        for (int num : nums)
-        {
-            ChangeIssue issue = this.issueMap.get(num);
-            if (issue == null)
-                continue;
-            if (issue.isSkipped())
-                continue;
-            return issue;
-        }
-        return null;
-    }
-
     private Author getAuthor(Authors authors, RevCommit commit)
     {
         Author author = authors.find(commit.getAuthorIdent().getEmailAddress());
@@ -531,17 +511,7 @@ public class ChangelogTool implements AutoCloseable
             .collect(Collectors.toList());
     }
 
-    private List<ChangeIssue> getRelevantPullRequests()
-    {
-        return issueMap.values().stream()
-            .filter((issue) -> !issue.isSkipped())
-            .filter((issue) -> issue.getType() == IssueType.PULL_REQUEST)
-            .filter((issue) -> branch.equals(issue.getBaseRef()))
-            .sorted(Comparator.comparing(ChangeIssue::getNum).reversed())
-            .collect(Collectors.toList());
-    }
-
-    private Predicate<String> getStringPredicate(Collection<Predicate<String>> filters)
+    private Predicate<String> newStringPredicate(Collection<Predicate<String>> filters)
     {
         Predicate<String> predicate = str -> true;
         for (Predicate<String> logPredicate : filters)
@@ -564,64 +534,6 @@ public class ChangelogTool implements AutoCloseable
     private boolean isMergeCommit(RevCommit commit)
     {
         return ((commit.getParents() != null) && (commit.getParents().length >= 2));
-    }
-
-    private void linkActivity()
-    {
-        LOG.debug("Connecting up {} issues to {} commits", issueMap.size(), commitMap.size());
-
-        int connectedIssues = 0;
-        int connectedPullRequests = 0;
-        Set<String> uniqueCommits = new HashSet<>();
-
-        // Back reference the issues into the commits
-        for (ChangeIssue issue : issueMap.values())
-        {
-            // Does issue have relevance?
-            boolean hasRelevance = false;
-            for (String commitSha : issue.getCommits())
-            {
-                // Only pull in commits found via log, don't create new ones.
-                // This is done to avoid referencing commits outside of the log range.
-                String sha = commitSha.toLowerCase(Locale.US);
-                ChangeCommit changeCommit = commitMap.get(sha);
-                if (changeCommit != null)
-                {
-                    if (issue.getType() == IssueType.ISSUE)
-                    {
-                        connectedIssues++;
-                        uniqueCommits.add(sha);
-                        changeCommit.addIssueRef(issue.getNum());
-                    }
-                    else if (issue.getType() == IssueType.PULL_REQUEST)
-                    {
-                        connectedPullRequests++;
-                        uniqueCommits.add(sha);
-                        changeCommit.addPullRequestRef(issue.getNum());
-                    }
-
-                    if (!changeCommit.isSkipped())
-                    {
-                        hasRelevance = true;
-                    }
-                }
-            }
-            if (!hasRelevance)
-            {
-                issue.addSkipReason(Skip.NO_RELEVANT_COMMITS);
-            }
-
-            // special handling for pull requests
-            if (issue.getType() == IssueType.PULL_REQUEST)
-            {
-                if (!this.branch.equals(issue.getBaseRef()))
-                {
-                    issue.addSkipReason(Skip.NOT_CORRECT_BASE_REF);
-                }
-            }
-        }
-
-        LOG.debug("Connected {} commits to {} issues and {} pull requests", uniqueCommits.size(), connectedIssues, connectedPullRequests);
     }
 
     private void resolveChanges()
@@ -707,7 +619,7 @@ public class ChangelogTool implements AutoCloseable
             }
 
             // Note: this lookup (all branches that commit exists in) is VERY time consuming.
-            Predicate<String> branchesExclusionPredicate = getStringPredicate(branchExclusion);
+
             Set<String> branchesWithCommit = changelogCache.getBranchesContaining(sha);
             changeCommit.setBranches(branchesWithCommit);
             if (branchesWithCommit.stream().anyMatch(branchesExclusionPredicate))
@@ -733,67 +645,7 @@ public class ChangelogTool implements AutoCloseable
         changeCommit.setResolved();
     }
 
-    private void resolveIssueCommits() throws IOException, InterruptedException
-    {
-        List<ChangeIssue> relevantIssues = getRelevantKnownIssues();
-
-        int issuesTotal = relevantIssues.size();
-        int issuesLeft = issuesTotal;
-        System.out.printf("Resolving commit branches and paths on %,d issues ...%n", issuesLeft);
-
-        Predicate<String> branchesExclusionPredicate = getStringPredicate(branchExclusion);
-
-        for (ChangeIssue issue : relevantIssues)
-        {
-            System.out.printf("\r%,d issues left (out of %,d) ...      ", issuesLeft--, issuesTotal);
-            boolean interestingLabel = false;
-            if (issue.getType() == IssueType.PULL_REQUEST)
-            {
-                PullRequest pullRequest = getGitHubApi().pullRequest(this.githubOwner, this.githubRepoName, issue.getNum());
-                // if the PR have a label and even in part of some exclusion we may want to include it into changelog
-                // properties file contain mime mapping
-                for (String excludeLabel : excludedLabels)
-                {
-                    if (pullRequest.getLabels().stream().anyMatch(label -> label.getName().equals(excludeLabel)))
-                    {
-                        issue.addSkipReason(Skip.EXCLUDED_LABEL);
-                    }
-                }
-                if (!pullRequest.getLabels().isEmpty() && !issue.getSkipSet().contains(Skip.EXCLUDED_LABEL))
-                {
-                    interestingLabel = true;
-                }
-            }
-
-            for (String commitSha : issue.getCommits())
-            {
-                String sha = Sha.toLowercase(commitSha);
-                ChangeCommit commit = commitMap.get(sha);
-                if ((commit != null) && (!commit.isSkipped()))
-                {
-                    Set<String> diffPaths = changelogCache.getPaths(sha)
-                        .stream()
-                        .filter(Predicate.not(this::isExcludedPath))
-                        .collect(Collectors.toSet());
-                    commit.setFiles(diffPaths);
-                    if (diffPaths.isEmpty() && !interestingLabel)
-                    {
-                        commit.addSkipReason(Skip.NO_INTERESTING_PATHS_LEFT);
-                    }
-
-                    // Note: this lookup (all branches that commit exists in) is VERY time consuming.
-                    Set<String> branchesWithCommit = changelogCache.getBranchesContaining(sha);
-                    commit.setBranches(branchesWithCommit);
-                    if (branchesWithCommit.stream().anyMatch(branchesExclusionPredicate))
-                    {
-                        commit.addSkipReason(Skip.EXCLUDED_BRANCH);
-                    }
-                }
-            }
-        }
-    }
-
-    private void resolveIssues() throws IOException, InterruptedException
+    private void resolveIssues()
     {
         LOG.debug("Resolving issue details ...");
         List<ChangeIssue> unresolvedIssues = issueMap.values().stream()
