@@ -12,17 +12,13 @@
 
 package net.webtide.tools.release.plugins;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import net.webtide.tools.release.ChangeMetadata;
 import net.webtide.tools.release.Config;
+import net.webtide.tools.release.WriteOutput;
+import net.webtide.tools.release.WriteVersionTagText;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
-
-import static net.webtide.tools.release.ChangeMetadata.OUTPUT_FORMAT.TAG_TXT;
 
 /**
  * Produce a target/version-tag.txt which represents the changes
@@ -37,18 +33,10 @@ public class TagMojo extends AbstractReleaseToolsPlugin
     {
         try
         {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
             Config config = buildConfig();
-            ChangeMetadata saveRequest = new ChangeMetadata(
-                config.getOutputPath(),
-                config.isIncludeDependencyChanges(),
-                TAG_TXT,
-                version,
-                sdf.format(new Date())
-            );
-            doExecute(saveRequest);
-
-            getLog().info("Wrote version tag txt to" + config.getOutputPath().resolve(TAG_TXT.getFilename()));
+            config.getOutputTypes().add(WriteOutput.Type.VERSION_TXT);
+            doExecute();
+            getLog().info("Wrote version tag txt to" + config.getOutputPath().resolve(WriteVersionTagText.FILENAME));
         }
         catch (Exception e)
         {

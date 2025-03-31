@@ -28,10 +28,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class WriteVersionTagText implements WriteOutput
 {
+    public static final String FILENAME = "version-tag.txt";
+
     @Override
     public void write(ChangeMetadata changeMetadata) throws IOException
     {
-        Path versionTxt = changeMetadata.config().getOutputPath().resolve("VERSION.txt");
+        Path versionTxt = changeMetadata.config().getOutputPath().resolve(FILENAME);
         try (BufferedWriter writer = Files.newBufferedWriter(versionTxt, UTF_8);
              PrintWriter out = new PrintWriter(writer))
         {

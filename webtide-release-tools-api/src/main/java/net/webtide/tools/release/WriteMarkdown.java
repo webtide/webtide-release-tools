@@ -29,10 +29,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class WriteMarkdown implements WriteOutput
 {
+    public static String FILENAME = "changelog.md";
+
     @Override
     public void write(ChangeMetadata changeMetadata) throws IOException
     {
-        Path markdown = changeMetadata.config().getOutputPath().resolve("changelog.md");
+        Path markdown = changeMetadata.config().getOutputPath().resolve(FILENAME);
         try (BufferedWriter writer = Files.newBufferedWriter(markdown, UTF_8);
              PrintWriter out = new PrintWriter(writer))
         {
