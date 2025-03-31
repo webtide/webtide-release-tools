@@ -52,6 +52,7 @@ import net.webtide.tools.github.Label;
 import net.webtide.tools.github.PullRequest;
 import net.webtide.tools.github.PullRequestCommits;
 import net.webtide.tools.github.PullRequests;
+import net.webtide.tools.github.cache.PersistentCache;
 import net.webtide.tools.github.gson.ISO8601TypeAdapter;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.LogCommand;
@@ -72,11 +73,12 @@ public class ChangelogTool implements AutoCloseable
 
     private final Git git;
     private final Repository repository;
-    private final GitCache gitCache;
+    private final ChangelogCache changelogCache;
     private final Authors authors = Authors.load();
     private String githubOwner;
     private String githubRepoName;
     private GitHubApi github;
+    private Path gitCacheDir;
     private String branch;
     private String tagOldVersion;
     private String refCurrentVersion;
@@ -91,7 +93,7 @@ public class ChangelogTool implements AutoCloseable
     {
         git = Git.open(localGitRepo.toFile());
         repository = git.getRepository();
-        gitCache = new GitCache(git);
+        changelogCache = new ChangelogCache(git);
         System.out.println("Repository: " + repository);
     }
 
@@ -101,6 +103,7 @@ public class ChangelogTool implements AutoCloseable
         setGithubRepo(config.getGithubRepoOwner(), config.getGithubRepoName());
         setBranch(config.getBranch());
         setVersionRange(config.getTagVersionPrior(), config.getRefVersionCurrent());
+        setGitCacheDir(config.getGitCacheDir());
         config.getLabelExclusions().forEach(this::addLabelExclusion);
         config.getCommitPathRegexExclusions().forEach(this::addCommitPathRegexExclusion);
         config.getBranchRegexExclusions().forEach(this::addBranchRegexExclusion);
@@ -142,7 +145,7 @@ public class ChangelogTool implements AutoCloseable
     @Override
     public void close()
     {
-        this.gitCache.close();
+        this.changelogCache.close();
         this.repository.close();
         this.git.close();
     }
@@ -161,14 +164,32 @@ public class ChangelogTool implements AutoCloseable
         return null;
     }
 
+    public List<Change> getChanges()
+    {
+        return changes;
+    }
+
     public Collection<ChangeCommit> getCommits()
     {
         return this.commitMap.values();
     }
 
-    public List<Change> getChanges()
+    public Path getGitCacheDir()
     {
-        return changes;
+        return gitCacheDir;
+    }
+
+    public void setGitCacheDir(Path gitCacheDir)
+    {
+        this.gitCacheDir = gitCacheDir.toAbsolutePath();
+        try
+        {
+            FS.ensureDirectoryExists(this.gitCacheDir);
+        }
+        catch (IOException e)
+        {
+            LOG.warn("Unable to create git cache dir: {}", this.gitCacheDir, e);
+        }
     }
 
     public ChangeIssue getIssue(int num)
@@ -346,7 +367,7 @@ public class ChangelogTool implements AutoCloseable
                 ChangeCommit commit = commitMap.get(sha);
                 if ((commit != null) && (!commit.isSkipped()))
                 {
-                    Set<String> diffPaths = gitCache.getPaths(sha)
+                    Set<String> diffPaths = changelogCache.getPaths(sha)
                         .stream()
                         .filter(Predicate.not(this::isExcludedPath))
                         .collect(Collectors.toSet());
@@ -357,7 +378,7 @@ public class ChangelogTool implements AutoCloseable
                     }
 
                     // Note: this lookup (all branches that commit exists in) is VERY time consuming.
-                    Set<String> branchesWithCommit = gitCache.getBranchesContaining(sha);
+                    Set<String> branchesWithCommit = changelogCache.getBranchesContaining(sha);
                     commit.setBranches(branchesWithCommit);
                     if (branchesWithCommit.stream().anyMatch(branchesExclusionPredicate))
                     {
@@ -637,6 +658,11 @@ public class ChangelogTool implements AutoCloseable
         if (github == null)
         {
             github = GitHubApi.connect();
+            if (gitCacheDir != null && Files.isDirectory(gitCacheDir))
+            {
+                github.setCache(new PersistentCache(gitCacheDir));
+                LOG.info("Git Cache Enabled: {}", gitCacheDir);
+            }
             LOG.info("GitHub API Rate Limits: {}", github.getRateLimits());
         }
         return github;

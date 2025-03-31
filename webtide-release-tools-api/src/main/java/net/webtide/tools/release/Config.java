@@ -37,6 +37,8 @@ public class Config
     protected String githubRepoOwner;
     // github repo name
     protected String githubRepoName;
+    // local persistent cache directory for git actions
+    protected Path gitCacheDir;
     // git branch name to generate changelog for
     protected String branch;
     // tag of prior version
@@ -84,7 +86,10 @@ public class Config
         }
         else
         {
-            config = loadConfig(Paths.get("changelog-tool.json"));
+            Path changelogDefaultJson = Paths.get("changelog-tool.json");
+            if (!Files.exists(changelogDefaultJson))
+                throw new IllegalArgumentException("Unable to configure: Either specify a `--config_file=<file>` or have a `changelog-tool.json` present in the CWD");
+            config = loadConfig(changelogDefaultJson);
         }
 
         if (config == null)
@@ -98,6 +103,7 @@ public class Config
         }
 
         // overlay with arguments from command line
+        config.setGitCacheDir(args.getPath("git_cache_path", config.getGitCacheDir()));
         config.setRepoPath(args.getPath("repo_path", config.getRepoPath()));
         config.setGithubRepoName(args.getOrDefault("github_repo_name", config.getGithubRepoName()));
         config.setGithubRepoOwner(args.getOrDefault("github_repo_owner", config.getGithubRepoOwner()));
@@ -138,6 +144,16 @@ public class Config
     public void setCommitPathRegexExclusions(List<String> commitPathRegexExclusions)
     {
         this.commitPathRegexExclusions = commitPathRegexExclusions;
+    }
+
+    public Path getGitCacheDir()
+    {
+        return gitCacheDir;
+    }
+
+    public void setGitCacheDir(Path gitCacheDir)
+    {
+        this.gitCacheDir = gitCacheDir;
     }
 
     public String getGithubRepoName()

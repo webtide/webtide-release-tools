@@ -51,9 +51,9 @@ import org.slf4j.LoggerFactory;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class GitCache implements AutoCloseable
+public class ChangelogCache implements AutoCloseable
 {
-    private final static Logger LOG = LoggerFactory.getLogger(GitCache.class);
+    private final static Logger LOG = LoggerFactory.getLogger(ChangelogCache.class);
     private final Git git;
     private final Repository repository;
     private final RevWalk revWalker;
@@ -61,12 +61,12 @@ public class GitCache implements AutoCloseable
     private final Path commitsCache;
     private final Commits commits;
 
-    public GitCache(Git git)
+    public ChangelogCache(Git git)
     {
         this(git, resolveCacheFile(git.getRepository()));
     }
 
-    public GitCache(Git git, Path cacheFile)
+    public ChangelogCache(Git git, Path cacheFile)
     {
         this.git = git;
         this.repository = git.getRepository();
@@ -91,16 +91,13 @@ public class GitCache implements AutoCloseable
         Path configRoot = Paths.get(System.getProperty("user.home"), ".cache", "git-changelog", gitPath.getFileName().toString());
         LOG.debug("Git Cache: {}", configRoot);
 
-        if (!Files.exists(configRoot))
+        try
         {
-            try
-            {
-                Files.createDirectories(configRoot);
-            }
-            catch (IOException e)
-            {
-                LOG.warn("Unable to create config root directories: {}", configRoot, e);
-            }
+            FS.ensureDirectoryExists(configRoot);
+        }
+        catch (IOException e)
+        {
+            LOG.warn("Unable to create config root directories: {}", configRoot, e);
         }
 
         return configRoot.resolve("commits.json");

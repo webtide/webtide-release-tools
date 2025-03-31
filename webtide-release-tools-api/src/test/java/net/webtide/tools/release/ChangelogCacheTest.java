@@ -22,15 +22,15 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class GitCacheTest
+public class ChangelogCacheTest
 {
     @Test
-    public void testGitCache() throws IOException
+    public void testCache() throws IOException
     {
         String sha = "03984b49615e1cec8ba7edf82f0117a35dc0869a";
         Path cloneDir = GitUtil.findGitRoot();
         Git git = Git.open(cloneDir.toFile());
-        GitCache cache = new GitCache(git);
+        ChangelogCache cache = new ChangelogCache(git);
         Set<String> diffPaths = cache.getPaths(sha);
         assertEquals(35, diffPaths.stream().filter((filename) -> filename.startsWith("src/")).count());
         Set<String> branchesContaining = cache.getBranchesContaining(sha);

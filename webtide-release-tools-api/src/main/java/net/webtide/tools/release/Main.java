@@ -12,8 +12,6 @@
 
 package net.webtide.tools.release;
 
-import java.nio.file.Files;
-
 public class Main
 {
     public static void main(String[] args) throws Exception
@@ -37,10 +35,7 @@ public class Main
             System.out.printf("Found %,d commit entries%n", changelog.getCommits().size());
             System.out.printf("Found %,d issue/pr references%n", changelog.getIssues().size());
 
-            if (!Files.exists(config.outputPath))
-            {
-                Files.createDirectories(config.outputPath);
-            }
+            FS.ensureDirectoryExists(config.outputPath);
 
             String projectVersion = null;
             String date = null;
