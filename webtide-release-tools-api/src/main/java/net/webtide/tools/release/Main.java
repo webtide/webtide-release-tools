@@ -12,41 +12,37 @@
 
 package net.webtide.tools.release;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
 public class Main
 {
     public static void main(String[] args) throws Exception
     {
         Config config = Config.parseArgs(new Args(args));
 
-        try (ChangelogTool changelog = new ChangelogTool(config))
+        try (ChangelogTool tool = new ChangelogTool(config))
         {
-            // equivalent of git log <old>..<new>
-            changelog.resolveCommits();
+            tool.discoverChanges();
 
-            // resolve all title/body fields (in commits, issues, and prs) for textual issues references (recursively)
-            changelog.resolveIssues();
-
-            // resolve all of the issue and pull requests commits
-            changelog.resolveIssueCommits();
-
-            // link up commits / issues / pull requests
-            changelog.linkActivity();
-
-            System.out.printf("Found %,d commit entries%n", changelog.getCommits().size());
-            System.out.printf("Found %,d issue/pr references%n", changelog.getIssues().size());
+            System.out.printf("Found %,d commit entries%n", tool.getCommits().size());
+            System.out.printf("Found %,d issue/pr references%n", tool.getIssues().size());
+            System.out.printf("Found %,d changes%n", tool.getChangelog().size());
 
             FS.ensureDirectoryExists(config.outputPath);
 
-            String projectVersion = null;
-            String date = null;
+            String projectVersion = config.getRefVersionCurrent();
+            ZonedDateTime versionDate = tool.getCurrentVersionCommitterWhen();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
+            String date = formatter.format(versionDate);
 
             config.getOutputTypes().add(WriteOutput.Type.MARKDOWN);
 
             ChangeMetadata saveRequest = new ChangeMetadata(config,
                 projectVersion,
                 date,
-                changelog.getChanges());
-            changelog.save(saveRequest);
+                tool.getChangelog());
+            tool.save(saveRequest);
             System.out.printf("Wrote changelog to %s%n", config.outputPath.toAbsolutePath());
         }
     }

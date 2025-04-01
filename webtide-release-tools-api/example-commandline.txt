@@ -32,7 +32,7 @@ java -jar target/webtide-release-tools-api-1.0-SNAPSHOT-hybrid.jar \
    --includeDependencyChanges=false \
    --tag_version_prior=jetty-12.0.16 \
    --ref_version_current=jetty-12.0.17 \
-   --output_path=logs/12.0.17
+   --output_path=logs/12.0.17b
 
 java -jar target/webtide-release-tools-api-1.0-SNAPSHOT-hybrid.jar \
    --config_file=configs/config-12.1.x.json \

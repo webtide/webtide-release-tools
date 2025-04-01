@@ -18,8 +18,19 @@ import java.util.Set;
 
 public abstract class ChangeRef
 {
+    private boolean resolved = false;
     private Set<Skip> skipSet;
     private int changeRef = -1;
+
+    public boolean isResolved()
+    {
+        return resolved;
+    }
+
+    public void setResolved()
+    {
+        this.resolved = true;
+    }
 
     public void addSkipReason(Skip skip)
     {

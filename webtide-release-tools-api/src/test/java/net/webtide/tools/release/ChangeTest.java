@@ -35,9 +35,9 @@ public class ChangeTest
         List<Change> changes = loadSimpleChangeList(MavenTestingUtils.getTestResourcePathFile("dep-changes-unsorted.txt"));
 
         List<String> actual = changes.stream()
-            .map(new ChangelogTool.DependencyBumpSimplifier())
-            .sorted(new ChangelogTool.DependencyBumpComparator())
-            .filter(new ChangelogTool.DistinctDependencyBumpRef())
+            .map(new Dependencies.BumpFromToSimplifier())
+            .sorted(new Dependencies.BumpToComparator())
+            .filter(new Dependencies.BumpDistinct())
             .map((change) -> String.format("* #%d - %s", change.getRefNumber(), change.getRefTitle()))
             .collect(Collectors.toList());
 
