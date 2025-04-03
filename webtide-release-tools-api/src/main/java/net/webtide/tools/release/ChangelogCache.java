@@ -46,6 +46,7 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,6 +148,8 @@ public class ChangelogCache implements AutoCloseable
         final List<DiffEntry> diffs = git.diff()
             .setOldTree(prepareTreeParser(sha + "^"))
             .setNewTree(prepareTreeParser(sha))
+            .setPathFilter(TreeFilter.ANY_DIFF)
+            .setShowNameOnly(true)
             .call();
 
         final Set<String> paths = new HashSet<>();
