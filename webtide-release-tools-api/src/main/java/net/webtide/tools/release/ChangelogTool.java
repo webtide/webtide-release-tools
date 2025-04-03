@@ -255,6 +255,12 @@ public class ChangelogTool implements AutoCloseable
 
     public void setGitCacheDir(Path gitCacheDir)
     {
+        if (gitCacheDir == null)
+        {
+            this.gitCacheDir = null;
+            return;
+        }
+
         this.gitCacheDir = gitCacheDir.toAbsolutePath();
         try
         {
