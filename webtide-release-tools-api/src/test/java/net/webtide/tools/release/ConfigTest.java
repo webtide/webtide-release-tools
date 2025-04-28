@@ -39,6 +39,7 @@ public class ConfigTest
         Path outputDir = MavenTestingUtils.getTargetTestingPath("testWriteConfig");
         FS.ensureEmpty(outputDir);
         config.setOutputPath(outputDir);
+        config.getOutputTypes().add(WriteOutput.Type.MARKDOWN);
 
         Path outputFile = outputDir.resolve("config.json");
         try (BufferedWriter writer = Files.newBufferedWriter(outputFile))

@@ -21,5 +21,9 @@
   ],
   "branch_regex_exclusions": [
     ".*/jetty-9\\.3\\.x$"
+  ],
+  "output_types": [
+    "MARKDOWN",
+    "VERSION_TXT"
   ]
 }

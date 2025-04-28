@@ -36,7 +36,8 @@ public class Main
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
             String date = formatter.format(versionDate);
 
-            config.getOutputTypes().add(WriteOutput.Type.MARKDOWN);
+            if (config.getOutputTypes().isEmpty())
+                config.getOutputTypes().add(WriteOutput.Type.MARKDOWN);
 
             ChangeMetadata saveRequest = new ChangeMetadata(config,
                 projectVersion,
