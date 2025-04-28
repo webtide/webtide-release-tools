@@ -4,6 +4,9 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    ignore:
+      - dependency-name: "org.apache.maven.plugins"
+        versions: [">=4"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
