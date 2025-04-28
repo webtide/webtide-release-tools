@@ -42,7 +42,7 @@ public class WriteVersionTagText implements WriteOutput
                 .sorted(Comparator.comparingInt(Change::getRefNumber).reversed())
                 .toList();
 
-            writeSection(out, " " + changeMetadata.projectVersion() + " - " + changeMetadata.date(), relevantChanges.stream().filter((c) ->
+            writeSection(out, changeMetadata.projectVersion() + " - " + changeMetadata.date(), relevantChanges.stream().filter((c) ->
                 !c.hasLabel("dependencies")));
         }
     }
@@ -52,13 +52,11 @@ public class WriteVersionTagText implements WriteOutput
         List<Change> changes = changesStream.toList();
         if (!changes.isEmpty())
         {
-            out.println();
             out.println(sectionName);
-            out.println();
 
             for (Change change : changes)
             {
-                out.printf("+ #%d - ", change.getRefNumber());
+                out.printf("+ %d ", change.getRefNumber());
                 out.print(change.getRefTitle());
                 Set<String> authors = change.getAuthors().stream().filter(Predicate.not(Author::committer)).map(Author::toNiceName).collect(Collectors.toSet());
                 if (!authors.isEmpty())

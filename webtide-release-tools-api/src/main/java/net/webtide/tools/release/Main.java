@@ -33,7 +33,7 @@ public class Main
 
             String projectVersion = config.getRefVersionCurrent();
             ZonedDateTime versionDate = tool.getCurrentVersionCommitterWhen();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
             String date = formatter.format(versionDate);
 
             if (config.getOutputTypes().isEmpty())

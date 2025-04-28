@@ -3,9 +3,9 @@ java -jar target/webtide-release-tools-api-1.0-SNAPSHOT-hybrid.jar \
    --config_file=configs/config-9.4.x.json \
    --repo_path=/home/joakim/code/jetty/jetty.project-alt/ \
    --includeDependencyChanges=false \
-   --tag_version_prior=jetty-9.4.54.v20240208 \
-   --ref_version_current=jetty-9.4.55.v20240627 \
-   --output_path=logs/9.4.55
+   --tag_version_prior=jetty-9.4.56.v20240826 \
+   --ref_version_current=jetty-9.4.57.v20241219 \
+   --output_path=logs/9.4.57
 
 
 java -jar target/webtide-release-tools-api-1.0-SNAPSHOT-hybrid.jar \
