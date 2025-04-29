@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -54,9 +56,12 @@ public class WriteVersionTagText implements WriteOutput
         {
             out.println(sectionName);
 
-            for (Change change : changes)
+            List<Change> sortedChanges = new ArrayList<>(changes);
+            Collections.reverse(sortedChanges);
+
+            for (Change change : sortedChanges)
             {
-                out.printf("+ %d ", change.getRefNumber());
+                out.printf(" + %d ", change.getRefNumber());
                 out.print(change.getRefTitle());
                 Set<String> authors = change.getAuthors().stream().filter(Predicate.not(Author::committer)).map(Author::toNiceName).collect(Collectors.toSet());
                 if (!authors.isEmpty())
