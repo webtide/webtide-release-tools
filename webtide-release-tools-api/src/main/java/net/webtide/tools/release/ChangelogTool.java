@@ -210,7 +210,7 @@ public class ChangelogTool implements AutoCloseable
             }
             catch (MissingObjectException moe)
             {
-                changeCommit.addSkipReason(Skip.MISSING_REF);
+                changeCommit.addSkipReason(Skip.GIT_OBJ_MISSING);
                 changeCommit.setResolved();
             }
         }

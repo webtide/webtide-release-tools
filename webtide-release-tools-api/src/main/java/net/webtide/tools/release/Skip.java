@@ -31,5 +31,5 @@ public enum Skip
     // Issue/PR has no relevant commits (either no commits, or only commits that are skipped)
     NO_RELEVANT_COMMITS,
     // Referenced Git Object is missing
-    MISSING_REF;
+    GIT_OBJ_MISSING;
 }
