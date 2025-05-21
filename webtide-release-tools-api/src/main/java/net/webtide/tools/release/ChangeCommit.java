@@ -152,4 +152,10 @@ public class ChangeCommit extends ChangeRef
     {
         this.title = title;
     }
+
+    @Override
+    public String toString()
+    {
+        return getSha() + ":" + getTitle();
+    }
 }
