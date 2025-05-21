@@ -13,6 +13,7 @@
     "^\\.git.*",
     "^/dev/.*",
     "^Jenkins.*",
+    ".*/pom\\.xml$",
     ".*\\.md$",
     ".*\\.txt$",
     ".*\\.properties$",
