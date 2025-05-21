@@ -6,6 +6,7 @@
   </appender>
 
   <logger name="net.webtide.tools" level="INFO" />
+  <logger name="net.webtide.tools.release" level="INFO" />
   <logger name="net.webtide.tools.github" level="INFO" />
 
   <root level="INFO">
