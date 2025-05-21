@@ -236,7 +236,7 @@ public class Change
             this.refNumber = issue.getNumber();
             this.refType = IssueType.ISSUE;
             this.refsAssociated = null;
-            this.refTitle = cleanupTitle(issue.getTitle());
+            setRefTitle(cleanupTitle(issue.getTitle()));
             return true;
         }
         else
@@ -267,7 +267,7 @@ public class Change
             {
                 this.refsAssociated = null;
             }
-            this.refTitle = cleanupTitle(pr.getTitle());
+            setRefTitle(cleanupTitle(pr.getTitle()));
             return true;
         }
         else
