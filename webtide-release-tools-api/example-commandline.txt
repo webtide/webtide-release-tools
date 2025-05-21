@@ -1,7 +1,7 @@
 
 java -jar target/webtide-release-tools-api-1.0-SNAPSHOT-hybrid.jar \
    --config_file=configs/config-9.4.x.json \
-   --repo_path=/home/joakim/code/jetty/jetty.project-alt/ \
+   --repo_path=/home/joakim/code/jetty/alt/ \
    --includeDependencyChanges=false \
    --tag_version_prior=jetty-9.4.56.v20240826 \
    --ref_version_current=jetty-9.4.57.v20241219 \
@@ -10,7 +10,7 @@ java -jar target/webtide-release-tools-api-1.0-SNAPSHOT-hybrid.jar \
 
 java -jar target/webtide-release-tools-api-1.0-SNAPSHOT-hybrid.jar \
    --config_file=configs/config-10.0.x.json \
-   --repo_path=/home/joakim/code/jetty/jetty.project-alt/ \
+   --repo_path=/home/joakim/code/jetty/alt/ \
    --includeDependencyChanges=false \
    --tag_version_prior=jetty-10.0.24 \
    --ref_version_current=jetty-10.0.25 \
@@ -19,7 +19,7 @@ java -jar target/webtide-release-tools-api-1.0-SNAPSHOT-hybrid.jar \
 
 java -jar target/webtide-release-tools-api-1.0-SNAPSHOT-hybrid.jar \
    --config_file=configs/config-11.0.x.json \
-   --repo_path=/home/joakim/code/jetty/jetty.project-alt/ \
+   --repo_path=/home/joakim/code/jetty/alt/ \
    --includeDependencyChanges=false \
    --tag_version_prior=jetty-11.0.24 \
    --ref_version_current=jetty-11.0.25 \
@@ -28,16 +28,16 @@ java -jar target/webtide-release-tools-api-1.0-SNAPSHOT-hybrid.jar \
 
 java -jar target/webtide-release-tools-api-1.0-SNAPSHOT-hybrid.jar \
    --config_file=configs/config-12.0.x.json \
-   --repo_path=/home/joakim/code/jetty/jetty.project-alt/ \
+   --repo_path=/home/joakim/code/jetty/alt/ \
    --includeDependencyChanges=false \
-   --tag_version_prior=jetty-12.0.18 \
-   --ref_version_current=jetty-12.0.19 \
-   --output_path=logs/12.0.19
+   --tag_version_prior=jetty-12.0.19 \
+   --ref_version_current=origin/jetty-12.0.x \
+   --output_path=logs/12.0.20
 
 java -jar target/webtide-release-tools-api-1.0-SNAPSHOT-hybrid.jar \
    --config_file=configs/config-12.1.x.json \
-   --repo_path=/home/joakim/code/jetty/jetty.project-alt/ \
+   --repo_path=/home/joakim/code/jetty/alt/ \
    --includeDependencyChanges=false \
-   --tag_version_prior=jetty-12.1.0.alpha0 \
-   --ref_version_current=jetty-12.1.0.alpha1 \
-   --output_path=logs/12.1.0.alpha1
+   --tag_version_prior=jetty-12.1.0.alpha2 \
+   --ref_version_current=jetty-12.1.0.beta0 \
+   --output_path=logs/12.1.0.beta0
