@@ -158,6 +158,9 @@ public class ChangelogTool implements AutoCloseable
         // recursively find issue and pull request references in commits
         discoverChangesRecursively();
 
+        // resolve issue/PR relevancy
+        resolveRelevancy();
+
         // resolve all the discovered commits and issues into a set of changes
         resolveChanges();
     }
@@ -288,6 +291,15 @@ public class ChangelogTool implements AutoCloseable
         return this.issueMap.values();
     }
 
+    private void saveLog(Gson gson, Path logFile, Object obj, Class<?> clazz) throws IOException
+    {
+        try (BufferedWriter writer = Files.newBufferedWriter(logFile, UTF_8);
+             JsonWriter jsonWriter = gson.newJsonWriter(writer))
+        {
+            gson.toJson(obj, clazz, jsonWriter);
+        }
+    }
+
     public void save(ChangeMetadata changeMetadata) throws IOException
     {
         Gson gson = new GsonBuilder().setPrettyPrinting()
@@ -295,33 +307,13 @@ public class ChangelogTool implements AutoCloseable
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .create();
 
-        Path authorsLog = changeMetadata.config().getOutputPath().resolve("authors-scan.json");
-        try (BufferedWriter writer = Files.newBufferedWriter(authorsLog, UTF_8);
-             JsonWriter jsonWriter = gson.newJsonWriter(writer))
-        {
-            gson.toJson(authors, Authors.class, jsonWriter);
-        }
+        Path outputDir = changeMetadata.config().getOutputPath();
 
-        Path issueLog = changeMetadata.config().getOutputPath().resolve("change-issues.json");
-        try (BufferedWriter writer = Files.newBufferedWriter(issueLog, UTF_8);
-             JsonWriter jsonWriter = gson.newJsonWriter(writer))
-        {
-            gson.toJson(issueMap.values(), Set.class, jsonWriter);
-        }
-
-        Path commitsLog = changeMetadata.config().getOutputPath().resolve("change-commits.json");
-        try (BufferedWriter writer = Files.newBufferedWriter(commitsLog, UTF_8);
-             JsonWriter jsonWriter = gson.newJsonWriter(writer))
-        {
-            gson.toJson(commitMap.values(), Set.class, jsonWriter);
-        }
-
-        Path changeLog = changeMetadata.config().getOutputPath().resolve("change-groups.json");
-        try (BufferedWriter writer = Files.newBufferedWriter(changeLog, UTF_8);
-             JsonWriter jsonWriter = gson.newJsonWriter(writer))
-        {
-            gson.toJson(changelog, List.class, jsonWriter);
-        }
+        saveLog(gson, outputDir.resolve("authors-scan.json"), authors, Authors.class);
+        saveLog(gson, outputDir.resolve("change-issues.json"), issueMap.values(), Set.class);
+        saveLog(gson, outputDir.resolve("change-issues-relevant.json"), getRelevantKnownIssues(), List.class);
+        saveLog(gson, outputDir.resolve("change-commits.json"), commitMap.values(), Set.class);
+        saveLog(gson, outputDir.resolve("change-groups.json"), changelog, List.class);
 
         Path changePaths = changeMetadata.config().getOutputPath().resolve("change-paths.log");
         try (BufferedWriter writer = Files.newBufferedWriter(changePaths))
@@ -511,8 +503,6 @@ public class ChangelogTool implements AutoCloseable
     {
         return issueMap.values().stream()
             .filter((issue) -> !issue.isSkipped())
-            .filter((issue) -> issue.getType() != IssueType.UNKNOWN)
-            .filter((issue) -> branch.equals(issue.getBaseRef()))
             .sorted(Comparator.comparing(ChangeIssue::getNum).reversed())
             .collect(Collectors.toList());
     }
@@ -542,11 +532,31 @@ public class ChangelogTool implements AutoCloseable
         return ((commit.getParents() != null) && (commit.getParents().length >= 2));
     }
 
+    private void resolveRelevancy()
+    {
+        for (ChangeIssue issue : issueMap.values())
+        {
+            int relevantCommitCount = 0;
+            for (String sha : issue.getCommits())
+            {
+                ChangeCommit commit = getCommit(sha);
+                if (!commit.isSkipped())
+                    relevantCommitCount++;
+            }
+            if (relevantCommitCount == 0)
+            {
+                issue.addSkipReason(Skip.NO_RELEVANT_COMMITS);
+            }
+        }
+    }
+
     private void resolveChanges()
     {
         // Create Change list
         int changeId = 0;
-        for (ChangeIssue issue : getRelevantKnownIssues())
+        List<ChangeIssue> relevantIssues = getRelevantKnownIssues();
+        System.out.printf("Found %,d relevant issue/pr references%n", relevantIssues.size());
+        for (ChangeIssue issue : relevantIssues)
         {
             if (issue.isSkipped() || issue.hasChangeRef())
                 continue;
@@ -698,6 +708,16 @@ public class ChangelogTool implements AutoCloseable
                         issue.addSkipReason(Skip.EXCLUDED_LABEL);
                     }
                 }
+
+                if (!ghPullRequest.isMerged())
+                {
+                    issue.addSkipReason(Skip.NOT_CLOSED);
+                }
+
+                if (!branch.equals(issue.getBaseRef()))
+                {
+                    issue.addSkipReason(Skip.NOT_CORRECT_BASE_REF);
+                }
             }
             else
             {
@@ -784,9 +804,11 @@ public class ChangelogTool implements AutoCloseable
         if (commit != null)
         {
             if (commit.hasChangeRef() || // does it already have a change reference?
-                commit.isSkipped()) // is it skipped for some reason? (like a MISSING_REF)
+                commit.isSkipped()) // is it skipped for some reason?
                 return; // ignore it
 
+            if (LOG.isDebugEnabled())
+                LOG.debug("Update Change [{}]: commit: {}", change.getNumber(), commit);
             commit.setChangeRef(change);
 
             change.addCommit(commit);
@@ -804,10 +826,14 @@ public class ChangelogTool implements AutoCloseable
         ChangeIssue issue = this.issueMap.get(issueNum);
         if (issue != null)
         {
-            if (issue.hasChangeRef())
-                return; // ignore it, already referenced
+            if (issue.isSkipped() || // skipped
+                issue.hasChangeRef()) // already assigned to a change ref
+                return; // ignore it
 
             issue.setChangeRef(change);
+
+            if (LOG.isDebugEnabled())
+                LOG.debug("Update Change [{}]: issue: {}", change.getNumber(), issue);
 
             switch (issue.getType())
             {
