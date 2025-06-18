@@ -36,11 +36,17 @@
     <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
     <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
     <license.plugin.version>5.0.0</license.plugin.version>
+    <njord.autoPublish>true</njord.autoPublish>
+    <njord.version>0.6.1</njord.version>
   </properties>
 
   <distributionManagement>
+    <repository>
+      <id>sonatype-cp</id>
+      <url>https://repo.maven.apache.org/maven2</url>
+    </repository>
     <snapshotRepository>
-      <id>central</id>
+      <id>sonatype-cp</id>
       <url>https://central.sonatype.com/repository/maven-snapshots</url>
     </snapshotRepository>
   </distributionManagement>
@@ -97,6 +103,9 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
           <version>${maven.deploy.plugin.version}</version>
+          <configuration>
+            <deployAtEnd>true</deployAtEnd>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -148,6 +157,11 @@
           <artifactId>license-maven-plugin</artifactId>
           <version>${license.plugin.version}</version>
         </plugin>
+        <plugin>
+          <groupId>eu.maveniverse.maven.plugins</groupId>
+          <artifactId>njord</artifactId>
+          <version>${njord.version}</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
@@ -181,16 +195,13 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.sonatype.central</groupId>
-        <artifactId>central-publishing-maven-plugin</artifactId>
-        <version>0.7.0</version>
-        <extensions>true</extensions>
-        <configuration>
-          <publishingServerId>central</publishingServerId>
-          <waitUntil>uploaded</waitUntil>
-        </configuration>
-      </plugin>
     </plugins>
+    <extensions>
+      <extension>
+        <groupId>eu.maveniverse.maven.njord</groupId>
+        <artifactId>extension</artifactId>
+        <version>${njord.version}</version>
+      </extension>
+    </extensions>
   </build>
 </project>
