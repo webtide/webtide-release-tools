@@ -403,7 +403,7 @@ public class ChangelogTool implements AutoCloseable
         }
 
         // nothing found so we return head of branch
-        Ref headRef = repository.findRef(branch);
+        Ref headRef = branch == null ? repository.exactRef("HEAD") : repository.findRef(branch);
         ObjectId headHash = headRef.getObjectId();
         try (RevWalk walk = new RevWalk(repository))
         {

@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import net.webtide.tools.release.WriteVersionTagText;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -44,14 +46,18 @@ public class UpdateVersionTextMojo extends TagMojo
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException
     {
-        // TODO add a flag to reuse already generated files
         super.execute();
         try
         {
             Files.deleteIfExists(versionTextOutputFile.toPath());
             Path versionTagOutputFile = projectBuildDirectory.toPath().resolve(WriteVersionTagText.FILENAME);
+
             Files.write(versionTextOutputFile.toPath(), Files.readAllBytes(versionTagOutputFile), StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
-            Files.write(versionTextOutputFile.toPath(), Files.readAllBytes(originalVersionTextOutputFile.toPath()), StandardOpenOption.APPEND);
+            // we need to skip the line ending with -SNAPSHOT if any
+            List<String> lines = Files.readAllLines(originalVersionTextOutputFile.toPath()).stream()
+                    .filter(line -> !line.contains(releaseVersion.endsWith("-SNAPSHOT") ? releaseVersion : releaseVersion + "-SNAPSHOT"))
+                    .toList();
+            Files.write(versionTextOutputFile.toPath(), lines, StandardOpenOption.APPEND);
         }
         catch (IOException e)
         {
