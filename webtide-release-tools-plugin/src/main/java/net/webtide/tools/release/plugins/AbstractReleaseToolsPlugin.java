@@ -45,6 +45,13 @@ public abstract class AbstractReleaseToolsPlugin extends AbstractMojo
     private String tagVersionPrior;
     private Config config;
 
+    @Parameter(property = "webtide.release.tools.gitCacheDir") // , defaultValue = "${project.build.directory}/gitCacheDir")
+    private File gitCacheDir;
+
+    @Parameter(property = "webtide.release.tools.releaseVersion", defaultValue = "${project.version}")
+    protected String releaseVersion;
+
+
     public void doExecute() throws MojoExecutionException
     {
         Config config = buildConfig();
@@ -59,7 +66,7 @@ public abstract class AbstractReleaseToolsPlugin extends AbstractMojo
 
             FS.ensureDirectoryExists(config.getOutputPath());
 
-            String projectVersion = config.getRefVersionCurrent();
+            String projectVersion = releaseVersion == null ? config.getRefVersionCurrent() : releaseVersion;
             ZonedDateTime versionDate = tool.getCurrentVersionCommitterWhen();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
             String date = formatter.format(versionDate);
@@ -88,6 +95,7 @@ public abstract class AbstractReleaseToolsPlugin extends AbstractMojo
                 this.config.setRefVersionCurrent(refVersionCurrent);
                 this.config.setTagVersionPrior(tagVersionPrior);
                 this.config.setRepoPath(Paths.get("./"));
+                this.config.setGitCacheDir(gitCacheDir == null ? null : gitCacheDir.toPath());
             }
             catch (IOException e)
             {
