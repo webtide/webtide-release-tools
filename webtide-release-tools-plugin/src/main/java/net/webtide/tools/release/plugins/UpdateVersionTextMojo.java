@@ -51,13 +51,8 @@ public class UpdateVersionTextMojo extends TagMojo
         {
             Files.deleteIfExists(versionTextOutputFile.toPath());
             Path versionTagOutputFile = projectBuildDirectory.toPath().resolve(WriteVersionTagText.FILENAME);
-
             Files.write(versionTextOutputFile.toPath(), Files.readAllBytes(versionTagOutputFile), StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
-            // we need to skip the line ending with -SNAPSHOT if any
-            List<String> lines = Files.readAllLines(originalVersionTextOutputFile.toPath()).stream()
-                    .filter(line -> !line.contains(releaseVersion.endsWith("-SNAPSHOT") ? releaseVersion : releaseVersion + "-SNAPSHOT"))
-                    .toList();
-            Files.write(versionTextOutputFile.toPath(), lines, StandardOpenOption.APPEND);
+            Files.write(versionTextOutputFile.toPath(), Files.readAllBytes(originalVersionTextOutputFile.toPath()), StandardOpenOption.APPEND);
         }
         catch (IOException e)
         {
