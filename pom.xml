@@ -37,7 +37,7 @@
     <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
     <license.plugin.version>5.0.0</license.plugin.version>
     <njord.autoPublish>true</njord.autoPublish>
-    <njord.version>0.6.1</njord.version>
+    <njord.version>0.8.0</njord.version>
   </properties>
 
   <distributionManagement>
@@ -159,7 +159,7 @@
         </plugin>
         <plugin>
           <groupId>eu.maveniverse.maven.plugins</groupId>
-          <artifactId>njord</artifactId>
+          <artifactId>njord3</artifactId>
           <version>${njord.version}</version>
         </plugin>
       </plugins>
@@ -199,7 +199,7 @@
     <extensions>
       <extension>
         <groupId>eu.maveniverse.maven.njord</groupId>
-        <artifactId>extension</artifactId>
+        <artifactId>extension3</artifactId>
         <version>${njord.version}</version>
       </extension>
     </extensions>
