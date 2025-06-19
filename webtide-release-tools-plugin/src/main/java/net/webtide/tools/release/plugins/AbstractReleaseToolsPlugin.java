@@ -95,7 +95,9 @@ public abstract class AbstractReleaseToolsPlugin extends AbstractMojo
                 this.config.setRefVersionCurrent(refVersionCurrent);
                 this.config.setTagVersionPrior(tagVersionPrior);
                 this.config.setRepoPath(Paths.get("./"));
-                this.config.setGitCacheDir(gitCacheDir == null ? null : gitCacheDir.toPath());
+                if(gitCacheDir != null) {
+                    this.config.setGitCacheDir(gitCacheDir.toPath());
+                }
             }
             catch (IOException e)
             {
