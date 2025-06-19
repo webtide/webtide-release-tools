@@ -14,6 +14,7 @@ package net.webtide.tools.release.plugins;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -52,6 +53,7 @@ public class UpdateVersionTextMojo extends TagMojo
             Files.deleteIfExists(versionTextOutputFile.toPath());
             Path versionTagOutputFile = projectBuildDirectory.toPath().resolve(WriteVersionTagText.FILENAME);
             Files.write(versionTextOutputFile.toPath(), Files.readAllBytes(versionTagOutputFile), StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
+            Files.writeString(versionTextOutputFile.toPath(), "\n", StandardOpenOption.APPEND);
             Files.write(versionTextOutputFile.toPath(), Files.readAllBytes(originalVersionTextOutputFile.toPath()), StandardOpenOption.APPEND);
         }
         catch (IOException e)
