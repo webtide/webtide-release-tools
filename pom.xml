@@ -30,7 +30,7 @@
     <maven.install.plugin.version>3.0.0-M1</maven.install.plugin.version>
     <maven.jar.plugin.version>3.4.2</maven.jar.plugin.version>
     <maven.javadoc.plugin.version>3.11.2</maven.javadoc.plugin.version>
-    <maven.release.plugin.arguments />
+    <arguments />
     <maven.release.plugin.goals>deploy</maven.release.plugin.goals>
     <maven.release.plugin.preparationGoals>clean install</maven.release.plugin.preparationGoals>
     <maven.release.plugin.version>3.1.1</maven.release.plugin.version>
@@ -150,7 +150,7 @@
           <configuration>
             <useReleaseProfile>false</useReleaseProfile>
             <goals>${maven.release.plugin.goals}</goals>
-            <arguments>-Prelease-profile ${maven.release.plugin.arguments}</arguments>
+            <arguments>-Prelease-profile ${arguments}</arguments>
             <preparationGoals>${maven.release.plugin.preparationGoals}</preparationGoals>
             <mavenExecutorId>forked-path</mavenExecutorId>
           </configuration>
