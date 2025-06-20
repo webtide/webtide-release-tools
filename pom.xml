@@ -26,9 +26,14 @@
     <maven.dependency.plugin.version>3.8.1</maven.dependency.plugin.version>
     <maven.deploy.plugin.version>3.0.0-M1</maven.deploy.plugin.version>
     <maven.enforcer.plugin.version>3.5.0</maven.enforcer.plugin.version>
+    <maven.gpg.plugin.version>3.2.7</maven.gpg.plugin.version>
     <maven.install.plugin.version>3.0.0-M1</maven.install.plugin.version>
     <maven.jar.plugin.version>3.4.2</maven.jar.plugin.version>
     <maven.javadoc.plugin.version>3.11.2</maven.javadoc.plugin.version>
+    <maven.release.plugin.arguments />
+    <maven.release.plugin.goals>deploy</maven.release.plugin.goals>
+    <maven.release.plugin.preparationGoals>clean install</maven.release.plugin.preparationGoals>
+    <maven.release.plugin.version>3.1.1</maven.release.plugin.version>
     <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
     <maven.shade.plugin.version>3.6.0</maven.shade.plugin.version>
     <maven.source.plugin.version>3.3.1</maven.source.plugin.version>
@@ -120,6 +125,11 @@
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>${maven.gpg.plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-install-plugin</artifactId>
           <version>${maven.install.plugin.version}</version>
         </plugin>
@@ -132,6 +142,18 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>${maven.javadoc.plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>${maven.release.plugin.version}</version>
+          <configuration>
+            <useReleaseProfile>false</useReleaseProfile>
+            <goals>${maven.release.plugin.goals}</goals>
+            <arguments>-Prelease-profile ${maven.release.plugin.arguments}</arguments>
+            <preparationGoals>${maven.release.plugin.preparationGoals}</preparationGoals>
+            <mavenExecutorId>forked-path</mavenExecutorId>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -210,4 +232,52 @@
       </extension>
     </extensions>
   </build>
+
+  <profiles>
+    <profile>
+      <id>release-profile</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+                <phase>verify</phase>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 </project>
