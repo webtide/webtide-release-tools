@@ -13,11 +13,37 @@
 
   <url>https://github.com/webtide/webtide-release-tools</url>
 
+  <licenses>
+    <license>
+      <name>Eclipse Public License - Version 2.0</name>
+      <url>https://www.eclipse.org/legal/epl-2.0/</url>
+    </license>
+  </licenses>
+
   <modules>
     <module>webtide-github-api</module>
     <module>webtide-release-tools-api</module>
     <module>webtide-release-tools-plugin</module>
   </modules>
+
+  <developers>
+    <developer>
+      <id>olamy</id>
+      <name>Olivier Lamy</name>
+      <email>oliver.lamy@gmail.com</email>
+      <organization>Webtide, LLC</organization>
+      <organizationUrl>https://webtide.com</organizationUrl>
+      <timezone>Australia/Brisbane</timezone>
+    </developer>
+    <developer>
+      <id>joakime</id>
+      <name>Joakim Erdfelt</name>
+      <email>joakim@webtide.com</email>
+      <organization>Webtide, LLC</organization>
+      <organizationUrl>https://webtide.com</organizationUrl>
+      <timezone>America/Chicago</timezone>
+    </developer>
+  </developers>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
