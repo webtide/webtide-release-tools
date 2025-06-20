@@ -51,6 +51,12 @@
     </snapshotRepository>
   </distributionManagement>
 
+  <scm>
+    <connection>scm:git:https://github.com/webtide/webtide-release-tools</connection>
+    <developerConnection>scm:git:https://github.com/webtide/webtide-release-tools</developerConnection>
+    <url>https://github.com/webtide/webtide-release-tools</url>
+  </scm>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
