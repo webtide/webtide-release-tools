@@ -21,9 +21,8 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
- * Produce a target/version-tag.txt which represents the changes
- * for this particular release.  A file suitable to use as the git tag
- * message body, in tagging the release.
+ * Produce a changelog.md which represents the changes
+ * for this particular release.  A file suitable to use as body, in the Github release.
  */
 @Mojo(name = "gh-release", defaultPhase = LifecyclePhase.PROCESS_RESOURCES, threadSafe = true)
 public class GitHubReleaseMojo extends AbstractReleaseToolsPlugin
@@ -36,7 +35,7 @@ public class GitHubReleaseMojo extends AbstractReleaseToolsPlugin
             Config config = buildConfig();
             config.getOutputTypes().add(WriteOutput.Type.MARKDOWN);
             doExecute();
-            getLog().info("Wrote version tag txt to" + config.getOutputPath().resolve(WriteMarkdown.FILENAME));
+            getLog().info("Wrote changelog.md to" + config.getOutputPath().resolve(WriteMarkdown.FILENAME));
         }
         catch (Exception e)
         {
