@@ -5,7 +5,7 @@
 
   <groupId>net.webtide.tools</groupId>
   <artifactId>webtide-release-tools</artifactId>
-  <version>1.0</version>
+  <version>1.1-SNAPSHOT</version>
 
   <name>webtide-release-tools</name>
   <description>Release Tool Suite</description>
@@ -59,7 +59,7 @@
     <connection>scm:git:https://github.com/webtide/webtide-release-tools</connection>
     <developerConnection>scm:git:https://github.com/webtide/webtide-release-tools</developerConnection>
     <url>https://github.com/webtide/webtide-release-tools</url>
-    <tag>webtide-release-tools-1.0</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <dependencyManagement>
