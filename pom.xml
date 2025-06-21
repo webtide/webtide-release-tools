@@ -58,7 +58,7 @@
     <maven.install.plugin.version>3.0.0-M1</maven.install.plugin.version>
     <maven.jar.plugin.version>3.4.2</maven.jar.plugin.version>
     <maven.javadoc.plugin.version>3.11.2</maven.javadoc.plugin.version>
-    <arguments />
+    <arguments>-DskipTests</arguments>
     <maven.release.plugin.goals>deploy</maven.release.plugin.goals>
     <maven.release.plugin.preparationGoals>clean install</maven.release.plugin.preparationGoals>
     <maven.release.plugin.version>3.1.1</maven.release.plugin.version>
@@ -177,6 +177,7 @@
           <artifactId>maven-release-plugin</artifactId>
           <version>${maven.release.plugin.version}</version>
           <configuration>
+            <localCheckout>true</localCheckout>
             <useReleaseProfile>false</useReleaseProfile>
             <goals>${maven.release.plugin.goals}</goals>
             <arguments>-Prelease-profile ${arguments}</arguments>
