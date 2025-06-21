@@ -144,6 +144,7 @@
           <version>${maven.deploy.plugin.version}</version>
           <configuration>
             <deployAtEnd>true</deployAtEnd>
+            <retryFailedDeploymentCount>3</retryFailedDeploymentCount>
           </configuration>
         </plugin>
         <plugin>
