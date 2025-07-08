@@ -69,7 +69,7 @@
     <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
     <license.plugin.version>5.0.0</license.plugin.version>
     <njord.autoPublish>true</njord.autoPublish>
-    <njord.version>0.8.0</njord.version>
+    <njord.version>0.8.1</njord.version>
   </properties>
 
   <distributionManagement>
