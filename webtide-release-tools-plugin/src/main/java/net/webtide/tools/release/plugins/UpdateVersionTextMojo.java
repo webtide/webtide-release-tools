@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,6 +56,8 @@ public class UpdateVersionTextMojo extends TagMojo
             Files.write(versionTextOutputFile.toPath(), Files.readAllBytes(versionTagOutputFile), StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
             Files.writeString(versionTextOutputFile.toPath(), "\n", StandardOpenOption.APPEND);
             Files.write(versionTextOutputFile.toPath(), Files.readAllBytes(originalVersionTextOutputFile.toPath()), StandardOpenOption.APPEND);
+            Files.move(versionTextOutputFile.toPath(), originalVersionTextOutputFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
         }
         catch (IOException e)
         {
