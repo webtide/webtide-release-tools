@@ -6,7 +6,7 @@
   <parent>
     <groupId>net.webtide.tools</groupId>
     <artifactId>webtide-release-tools</artifactId>
-    <version>1.1</version>
+    <version>1.2-SNAPSHOT</version>
   </parent>
 
   <artifactId>webtide-release-tools-plugin</artifactId>
